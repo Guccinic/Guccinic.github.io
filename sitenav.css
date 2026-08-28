@@ -1,0 +1,19 @@
+/* Site nav only — the working paper carries its own inline design system. */
+.sitenav{position:sticky;top:0;z-index:50;background:rgba(246,247,249,.9);
+  backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid #d8dde6;
+  font-family:system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+.sitenav .inner{max-width:1140px;margin:0 auto;padding:0 clamp(18px,4vw,44px);
+  display:flex;align-items:center;gap:8px;height:56px}
+.sitenav a.brand{font-weight:700;font-size:15px;color:#14171e;text-decoration:none;margin-right:auto}
+.sitenav a.brand span{color:#2b4796}
+.sitenav nav{display:flex;gap:4px;flex-wrap:wrap}
+.sitenav nav a{font-size:14px;color:#4f5769;text-decoration:none;padding:7px 12px;border-radius:6px}
+.sitenav nav a:hover{color:#2b4796;background:#e8ecf8}
+.sitenav nav a[aria-current="page"]{color:#2b4796;font-weight:600;background:#e8ecf8}
+@media (prefers-color-scheme:dark){
+  .sitenav{background:rgba(15,18,24,.9);border-bottom-color:#2a313d}
+  .sitenav a.brand{color:#e3e7ee}
+  .sitenav a.brand span{color:#7f9bec}
+  .sitenav nav a{color:#a6aebd}
+  .sitenav nav a:hover,.sitenav nav a[aria-current="page"]{color:#7f9bec;background:#182238}
+}

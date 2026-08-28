@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nicole Cevallos — Health Informatics Research</title>
+<meta name="description" content="Health informatics research on AI governance: instrumentation, compliance coverage, and monitoring architecture for healthcare organizations.">
+<meta property="og:title" content="Nicole Cevallos — Health Informatics Research">
+<meta property="og:description" content="AI governance research: what healthcare compliance frameworks cover, what they miss, and the instrumentation layer underneath them.">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+</head>
+<body>
+
+<div class="sitenav">
+  <div class="inner">
+    <a class="brand" href="index.html">Nicole Cevallos<span>.</span></a>
+    <nav>
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="capture-once.html">Working paper</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Health Informatics · AI Governance</p>
+    <h1>What healthcare compliance covers, what it misses, and the layer underneath.</h1>
+    <p class="lede">I research how healthcare organizations govern the artificial intelligence they deploy —
+      and why the frameworks they are required to follow leave the part that matters uncovered.
+      <strong>Current work: an instrumentation layer that records every AI interaction once, so every
+      compliance framework can be answered from the same data.</strong></p>
+    <div class="work-links">
+      <a class="btn primary" href="capture-once.html">Read the working paper</a>
+      <a class="btn" href="#work">All outputs</a>
+    </div>
+  </header>
+
+  <section id="work">
+    <h2>Research outputs</h2>
+    <p class="section-note">Everything below is either published, in draft, or explicitly marked as
+      planned. Nothing is listed that does not exist.</p>
+
+    <div class="works">
+
+      <article class="work">
+        <div class="work-top">
+          <span class="chip type">Working paper</span>
+          <span class="chip live">v3 · current</span>
+        </div>
+        <h3>Capture Once, Govern Many</h3>
+        <p>A compliance-native architecture for monitoring artificial intelligence in healthcare
+          organizations. Documents a coverage gap between the obligations healthcare organizations
+          actually hold and the operational surface of deployed AI, then specifies an architecture
+          in response: one standard event record, six collection methods, and each compliance
+          framework applied as a read-only view.</p>
+        <div class="work-links">
+          <a class="btn primary" href="capture-once.html">Read in full</a>
+          <a class="btn" href="#doi" aria-disabled="true">DOI — pending</a>
+        </div>
+        <div class="meta">
+          <span>Ten parts · ~8,400 words</span>
+          <span>Review window Jan 2025 – Aug 2026</span>
+          <span>Updated August 2026</span>
+        </div>
+      </article>
+
+      <article class="work">
+        <div class="work-top">
+          <span class="chip type">Conference poster</span>
+          <span class="chip live">THIA 2026</span>
+        </div>
+        <h3>From Data to Accountability: Preparing Health Informatics for the AI Governance Era</h3>
+        <p>Poster presentation of the coverage analysis and the proposed instrumentation layer,
+          including the mid-2026 certification developments and a deployment diagram showing where
+          the architecture attaches inside an existing health system.</p>
+        <div class="work-links">
+          <a class="btn" href="assets/poster.pdf">Poster (PDF)</a>
+          <a class="btn" href="capture-once.html">Underlying paper</a>
+        </div>
+        <div class="meta">
+          <span>Texas Health Informatics Alliance</span>
+          <span>Acknowledged contributor: Gabrielle Cevallos</span>
+        </div>
+      </article>
+
+      <article class="work pending">
+        <div class="work-top">
+          <span class="chip type">Prototype</span>
+          <span class="chip soon">Planned</span>
+        </div>
+        <h3>Reference implementation — event record and lens queries</h3>
+        <p>A working demonstration of the architecture on synthetic claims and encounter data: the
+          event schema, a collector reading existing audit logs, and one compliance lens computed
+          over the resulting record. Intended to test the paper's central hypothesis — that existing
+          mandated logging is sufficient to answer governance questions it is not currently asked.</p>
+        <div class="work-links">
+          <a class="btn" href="#" aria-disabled="true">Demo — in development</a>
+          <a class="btn" href="#" aria-disabled="true">Source — in development</a>
+        </div>
+        <div class="meta"><span>Status: design complete, build not started</span></div>
+      </article>
+
+    </div>
+
+    <div class="note" id="doi">
+      <span class="label">Citation</span>
+      <p>A permanent identifier for the working paper is being registered. Until then, cite the
+        version and date shown on the paper itself. This section will carry the DOI once issued.</p>
+    </div>
+  </section>
+
+  <section id="about">
+    <h2>About</h2>
+    <div class="col">
+      <p>I work in health informatics, on the boundary between clinical systems and the compliance
+        regimes that govern them. My current research began from a narrow observation: almost every
+        healthcare organization in the United States holds exactly one mandatory information-security
+        obligation, and it governs access to data rather than the behavior of the software making
+        decisions about patients.</p>
+      <p>That gap turns out to be structural rather than accidental. Obligation drives implementation;
+        the obligation stops at the data layer; and so the layer where artificial intelligence actually
+        creates risk goes unmonitored — not through negligence, but because nothing requires it and
+        the frameworks that would cover it cost six figures to certify against.</p>
+      <p>The work that follows from that observation is less about policy than about plumbing: if the
+        audit infrastructure is already legally required and already funded, the question is why it
+        has never been pointed at AI, and what it would take to do so at an organization that cannot
+        afford a certification program.</p>
+    </div>
+
+    <h3>Research interests</h3>
+    <dl class="kv">
+      <dt>Primary</dt>
+      <dd>AI governance instrumentation; compliance framework coverage analysis; post-deployment monitoring of clinical AI</dd>
+      <dt>Adjacent</dt>
+      <dd>Clinician–AI interaction and skill degradation; algorithmic decision quality observed from outside the model</dd>
+      <dt>Methods</dt>
+      <dd>Structured policy review; secondary data analysis; architecture specification</dd>
+    </dl>
+  </section>
+
+  <section id="contact">
+    <h2>Contact</h2>
+    <div class="col">
+      <p>Open to collaboration, co-authorship, and conversations with health systems interested in
+        testing the architecture — particularly organizations without a dedicated data science
+        function, since that is the case the work is meant to serve.</p>
+    </div>
+    <dl class="kv">
+      <dt>Email</dt><dd><a href="mailto:nicole.cevallos904@gmail.com">nicole.cevallos904@gmail.com</a></dd>
+      <dt>GitHub</dt><dd><a href="https://github.com/Guccinic">github.com/Guccinic</a></dd>
+      
+    </dl>
+  </section>
+
+</div>
+
+<footer class="site">
+  <div class="wrap inner">
+    <span>© 2026 Nicole Cevallos</span>
+    <span>Health informatics research</span>
+    <span><a href="capture-once.html">Working paper</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
