@@ -1,1081 +1,780 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Capture Once, Govern Many — a compliance-native architecture for monitoring AI in healthcare organizations. Working paper.">
-<meta property="og:title" content="Capture Once, Govern Many — working paper">
-<meta property="og:description" content="One event record, six collection methods, every compliance framework as a read-only view.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="sitenav.css">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Capture Once, Govern Many — Nicole Cevallos</title>
+<meta name="description" content="A proposed architecture for unified AI governance in healthcare — one standardized data record, read by every compliance framework at once.">
+<meta name="author" content="Nicole Cevallos">
+<meta property="og:title" content="Capture Once, Govern Many">
+<meta property="og:description" content="A proposed architecture for unified AI governance in healthcare — one standardized data record, read by every compliance framework at once.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #F5F4EF;
+  --surface: #FFFFFF;
+  --surface-2: #EBEDF5;
+  --rule: #D5D9E8;
+  --rule-2: #AEB6CC;
+  --text: #191C25;
+  --text-2: #52596E;
+  --text-3: #818AA0;
+  --accent: #1B4D8C;
+  --accent-light: #E3EDF8;
+  --signal: #7B4C17;
+  --signal-bg: #FCF0E3;
+  --ok: #24593B;
+  --ok-bg: #E2F1EA;
+  --stop: #8A261E;
+  --stop-bg: #F7E5E3;
+  --shadow: 0 1px 3px rgba(0,0,0,.05), 0 6px 20px -8px rgba(0,0,0,.16);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10131A; --surface: #171B24; --surface-2: #1F2330;
+    --rule: #2A3044; --rule-2: #404D66;
+    --text: #E2E5F0; --text-2: #96A0BC; --text-3: #646E88;
+    --accent: #6899DC; --accent-light: #172340;
+    --signal: #D4924A; --signal-bg: #25180A;
+    --ok: #66BA84; --ok-bg: #122111;
+    --stop: #DC7870; --stop-bg: #27110E;
+    --shadow: 0 1px 3px rgba(0,0,0,.4), 0 6px 20px -8px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10131A; --surface: #171B24; --surface-2: #1F2330;
+  --rule: #2A3044; --rule-2: #404D66;
+  --text: #E2E5F0; --text-2: #96A0BC; --text-3: #646E88;
+  --accent: #6899DC; --accent-light: #172340;
+  --signal: #D4924A; --signal-bg: #25180A;
+  --ok: #66BA84; --ok-bg: #122111;
+  --stop: #DC7870; --stop-bg: #27110E;
+  --shadow: 0 1px 3px rgba(0,0,0,.4), 0 6px 20px -8px rgba(0,0,0,.6);
+}
+:root[data-theme="light"] {
+  --bg: #F5F4EF; --surface: #FFFFFF; --surface-2: #EBEDF5;
+  --rule: #D5D9E8; --rule-2: #AEB6CC;
+  --text: #191C25; --text-2: #52596E; --text-3: #818AA0;
+  --accent: #1B4D8C; --accent-light: #E3EDF8;
+  --signal: #7B4C17; --signal-bg: #FCF0E3;
+  --ok: #24593B; --ok-bg: #E2F1EA;
+  --stop: #8A261E; --stop-bg: #F7E5E3;
+  --shadow: 0 1px 3px rgba(0,0,0,.05), 0 6px 20px -8px rgba(0,0,0,.16);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  font-size: 17px;
+  line-height: 1.76;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-inline: clamp(18px, 5vw, 60px);
+  padding-block: 0 100px;
+}
+
+.prose { max-width: 72ch; }
+
+/* ── Header ── */
+header.masthead {
+  padding-block: clamp(48px, 8vw, 96px) 40px;
+  border-bottom: 2px solid var(--rule);
+  margin-bottom: 44px;
+}
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: inline-block;
+  border: 1px solid var(--accent);
+  padding: 4px 12px;
+  margin-bottom: 26px;
+}
+h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(36px, 6.5vw, 66px);
+  line-height: 1.06;
+  letter-spacing: -.02em;
+  font-weight: 700;
+  margin: 0 0 22px;
+  max-width: 16ch;
+  text-wrap: balance;
+}
+.deck {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: clamp(17px, 2.2vw, 21px);
+  color: var(--text-2);
+  max-width: 60ch;
+  line-height: 1.5;
+  margin: 0 0 28px;
+}
+.byline {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* ── TOC ── */
+nav.toc {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  padding: 24px 28px;
+  margin-bottom: 60px;
+  box-shadow: var(--shadow);
+}
+nav.toc h2 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-weight: 500;
+  margin: 0 0 16px;
+}
+nav.toc ol { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 40px; }
+nav.toc li { break-inside: avoid; margin-bottom: 8px; }
+nav.toc a { color: var(--text); text-decoration: none; display: flex; gap: 12px; align-items: baseline; font-size: 15.5px; }
+nav.toc a:hover { color: var(--accent); }
+nav.toc .n { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--accent); min-width: 22px; flex-shrink: 0; }
+nav.toc .locked { color: var(--text-3); font-size: 12px; margin-left: 4px; }
+@media (max-width: 580px) { nav.toc ol { columns: 1; } }
+
+/* ── Sections ── */
+section.part { margin-bottom: clamp(60px, 10vw, 110px); scroll-margin-top: 20px; }
+.part-head { border-top: 2px solid var(--text); padding-top: 18px; margin-bottom: 32px; }
+.part-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 10px;
+}
+h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(26px, 4vw, 40px);
+  line-height: 1.16;
+  font-weight: 700;
+  letter-spacing: -.015em;
+  margin: 0 0 14px;
+  text-wrap: balance;
+  max-width: 22ch;
+}
+.part-intro { font-size: 18px; color: var(--text-2); max-width: 62ch; line-height: 1.5; margin: 0; }
+h3 { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; font-weight: 600; margin: 44px 0 14px; letter-spacing: -.01em; line-height: 1.3; }
+h4 { font-family: 'Source Serif 4', Georgia, serif; font-size: 17px; font-weight: 700; margin: 28px 0 10px; }
+p { margin: 0 0 1.4em; }
+p:last-child { margin-bottom: 0; }
+ul, ol { margin: 0 0 1.4em; padding-left: 24px; }
+li { margin-bottom: 8px; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+strong { font-weight: 700; }
+em { font-style: italic; }
+code { font-family: 'IBM Plex Mono', monospace; font-size: .85em; background: var(--surface-2); padding: 2px 6px; border-radius: 2px; }
+
+/* ── Pull quote ── */
+.pullquote {
+  border-left: 4px solid var(--accent);
+  background: var(--accent-light);
+  padding: 24px 30px;
+  margin: 32px 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(18px, 2.5vw, 22px);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text);
+}
+.pullquote p { margin: 0 0 .7em; }
+.pullquote p:last-child { margin: 0; }
+.pullquote em { font-style: normal; font-weight: 600; }
+
+/* ── Callout boxes ── */
+.box { border: 1px solid var(--rule); background: var(--surface); padding: 20px 26px; margin: 28px 0; box-shadow: var(--shadow); }
+.box > :last-child { margin-bottom: 0; }
+.box-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; display: block; margin-bottom: 10px; color: var(--text-3); }
+.box-def { border-left: 4px solid var(--accent); background: var(--accent-light); }
+.box-def .box-label { color: var(--accent); }
+.box-warn { border-left: 4px solid var(--signal); background: var(--signal-bg); }
+.box-warn .box-label { color: var(--signal); }
+.box-good { border-left: 4px solid var(--ok); background: var(--ok-bg); }
+.box-good .box-label { color: var(--ok); }
+.box-note { border-left: 4px solid var(--rule-2); }
+.box-note .box-label { color: var(--text-3); }
+
+/* ── Stats ── */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border: 1px solid var(--rule); background: var(--surface); margin: 30px 0; box-shadow: var(--shadow); }
+.stats div { padding: 20px; border-right: 1px solid var(--rule); }
+.stats div:last-child { border-right: 0; }
+.stats b { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; display: block; font-size: clamp(26px, 3.5vw, 34px); line-height: 1; letter-spacing: -.03em; margin-bottom: 8px; color: var(--stop); }
+.stats span { font-size: 13.5px; color: var(--text-2); line-height: 1.4; display: block; }
+@media (max-width: 600px) { .stats div { border-right: 0; border-bottom: 1px solid var(--rule); } .stats div:last-child { border-bottom: 0; } }
+
+/* ── Tables ── */
+.scroller { overflow-x: auto; margin: 28px 0; }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-family: 'Source Serif 4', Georgia, serif; font-size: 15px; }
+th, td { padding: 12px 16px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+thead th { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); font-weight: 500; border-bottom: 1px solid var(--rule-2); line-height: 1.4; }
+tbody th { font-weight: 700; font-size: 15px; }
+tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+td.num { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ── Schema block ── */
+.schema { background: var(--surface-2); border: 1px solid var(--rule); border-left: 3px solid var(--accent); padding: 20px 24px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.9; overflow-x: auto; white-space: pre; margin: 26px 0; }
+.schema .k { color: var(--accent); }
+.schema .c { color: var(--text-3); }
+
+/* ── Tiers ── */
+.tiers { display: grid; gap: 14px; margin: 28px 0; }
+.tier { border: 1px solid var(--rule); background: var(--surface); padding: 20px 24px; box-shadow: var(--shadow); display: grid; grid-template-columns: 56px 1fr; gap: 20px; align-items: start; }
+.tier-n { font-family: 'IBM Plex Mono', monospace; font-size: 28px; font-weight: 700; color: var(--accent); line-height: 1; letter-spacing: -.04em; padding-top: 4px; }
+.tier h4 { margin: 0 0 8px; font-size: 17px; font-weight: 700; }
+.tier p { margin: 0 0 8px; font-size: 15.5px; color: var(--text-2); }
+.tier p:last-child { margin: 0; }
+@media (max-width: 500px) { .tier { grid-template-columns: 1fr; gap: 8px; } }
+
+/* ── Roles ── */
+.roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 28px 0; }
+.role { border: 1px solid var(--rule); border-top: 3px solid var(--accent); background: var(--surface); padding: 18px 20px; box-shadow: var(--shadow); }
+.role-tag { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 6px; }
+.role h4 { margin: 0 0 8px; font-size: 16px; font-weight: 700; }
+.role p { font-size: 14.5px; color: var(--text-2); margin: 0; line-height: 1.5; }
+
+/* ── Accordion ── */
+details { border: 1px solid var(--rule); background: var(--surface); margin: 10px 0; }
+summary { cursor: pointer; padding: 14px 22px; font-weight: 600; font-size: 16px; list-style: none; font-family: 'Source Serif 4', Georgia, serif; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "+ "; color: var(--accent); font-family: 'IBM Plex Mono', monospace; }
+details[open] summary::before { content: "&#8722; "; }
+details[open] summary { border-bottom: 1px solid var(--rule); }
+.dbody { padding: 18px 24px 6px; }
+.dbody > :last-child { margin-bottom: 18px; }
+
+hr.divider { border: 0; border-top: 1px solid var(--rule); margin: 36px 0; }
+
+/* ── Paywall ── */
+.paywall-fade {
+  position: relative;
+  max-height: 260px;
+  overflow: hidden;
+}
+.paywall-fade::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: linear-gradient(to bottom, transparent, var(--bg));
+  pointer-events: none;
+}
+.paywall-gate {
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 40px 40px 44px;
+  margin: 0 0 80px;
+  text-align: center;
+}
+.paywall-gate .gate-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  display: block;
+  margin-bottom: 20px;
+}
+.paywall-gate h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(24px, 3.5vw, 34px);
+  font-weight: 700;
+  margin: 0 0 14px;
+  letter-spacing: -.015em;
+  text-wrap: balance;
+}
+.paywall-gate .gate-sub {
+  font-size: 16px;
+  color: var(--text-2);
+  max-width: 52ch;
+  margin: 0 auto 28px;
+  line-height: 1.5;
+}
+.what-you-get {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 0 0 32px;
+  text-align: left;
+}
+.wyg-item {
+  background: var(--surface-2);
+  border: 1px solid var(--rule);
+  padding: 14px 16px;
+}
+.wyg-item .wyg-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 6px;
+}
+.wyg-item p { font-size: 14px; color: var(--text-2); margin: 0; line-height: 1.45; }
+.btn-gumroad {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 16px 40px;
+  font-weight: 500;
+  transition: opacity .15s;
+}
+.btn-gumroad:hover { opacity: .85; color: #fff; }
+.gate-price {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  display: block;
+  margin-top: 14px;
+}
+
+/* ── Footer ── */
+footer.site-foot {
+  border-top: 1px solid var(--rule);
+  padding: 36px 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--text-3);
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+footer.site-foot a { color: var(--text-3); text-decoration: none; }
+footer.site-foot a:hover { color: var(--accent); }
+</style>
 </head>
 <body>
-<div class="sitenav">
-  <div class="inner">
-    <a class="brand" href="index.html">Nicole Cevallos<span>.</span></a>
-    <nav>
-      <a href="index.html#work">Work</a>
-      <a href="index.html#about">About</a>
-      <a href="capture-once.html" aria-current="page">Working paper</a>
-      <a href="index.html#contact">Contact</a>
-    </nav>
-  </div>
-</div>
-
-<title>Capture Once, Govern Many</title>
-<style>
-  :root {
-    --paper: #f4f5f7;
-    --surface: #ffffff;
-    --surface-2: #eaecf1;
-    --rule: #d3d7e0;
-    --rule-2: #a8afbe;
-    --text: #171a21;
-    --text-2: #4c5464;
-    --text-3: #737c8e;
-    --accent: #2b4796;
-    --accent-2: #e8ecf8;
-    --signal: #9c6410;
-    --signal-bg: #fbf1de;
-    --ok: #2f6b48;
-    --ok-bg: #e4f0e8;
-    --stop: #a13a2c;
-    --stop-bg: #f9e6e2;
-    --shadow: 0 1px 2px rgba(23,26,33,.05), 0 10px 28px -16px rgba(23,26,33,.25);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --paper: #101219;
-      --surface: #171a23;
-      --surface-2: #1e222d;
-      --rule: #2b3140;
-      --rule-2: #454e61;
-      --text: #e2e5ec;
-      --text-2: #a4abbb;
-      --text-3: #7d859a;
-      --accent: #7f9bec;
-      --accent-2: #1a2340;
-      --signal: #d9a44e;
-      --signal-bg: #2a2113;
-      --ok: #6cb98a;
-      --ok-bg: #16281d;
-      --stop: #e0806e;
-      --stop-bg: #2c1a16;
-      --shadow: 0 1px 2px rgba(0,0,0,.5), 0 10px 28px -16px rgba(0,0,0,.8);
-    }
-  }
-  :root[data-theme="dark"] {
-    --paper: #101219; --surface: #171a23; --surface-2: #1e222d;
-    --rule: #2b3140; --rule-2: #454e61;
-    --text: #e2e5ec; --text-2: #a4abbb; --text-3: #7d859a;
-    --accent: #7f9bec; --accent-2: #1a2340;
-    --signal: #d9a44e; --signal-bg: #2a2113;
-    --ok: #6cb98a; --ok-bg: #16281d;
-    --stop: #e0806e; --stop-bg: #2c1a16;
-    --shadow: 0 1px 2px rgba(0,0,0,.5), 0 10px 28px -16px rgba(0,0,0,.8);
-  }
-  :root[data-theme="light"] {
-    --paper: #f4f5f7; --surface: #ffffff; --surface-2: #eaecf1;
-    --rule: #d3d7e0; --rule-2: #a8afbe;
-    --text: #171a21; --text-2: #4c5464; --text-3: #737c8e;
-    --accent: #2b4796; --accent-2: #e8ecf8;
-    --signal: #9c6410; --signal-bg: #fbf1de;
-    --ok: #2f6b48; --ok-bg: #e4f0e8;
-    --stop: #a13a2c; --stop-bg: #f9e6e2;
-    --shadow: 0 1px 2px rgba(23,26,33,.05), 0 10px 28px -16px rgba(23,26,33,.25);
-  }
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--text);
-    font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-size: 16.5px;
-    line-height: 1.62;
-    -webkit-font-smoothing: antialiased;
-  }
-  .mono, .eyebrow, .partnum, .schema, table, .tier-n, .role-tag {
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .wrap { max-width: 1140px; margin: 0 auto; padding: 0 clamp(18px,4vw,44px) 100px; }
-  .col { max-width: 70ch; }
-
-  /* masthead */
-  header.top {
-    padding: clamp(34px,6vw,80px) 0 30px;
-    border-bottom: 3px double var(--rule-2);
-    margin-bottom: 34px;
-  }
-  .stamp {
-    display: inline-flex; gap: 10px; align-items: center;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase;
-    color: var(--accent); border: 1px solid var(--accent);
-    padding: 5px 11px; margin-bottom: 24px;
-  }
-  h1 {
-    font-size: clamp(32px,6vw,60px); line-height: 1.04; margin: 0 0 20px;
-    font-weight: 700; letter-spacing: -.03em; text-wrap: balance; max-width: 17ch;
-  }
-  .sub {
-    font-size: clamp(17px,2.2vw,22px); color: var(--text-2); max-width: 60ch;
-    margin: 0 0 26px; line-height: 1.45;
-  }
-  .meta {
-    display: flex; flex-wrap: wrap; gap: 8px 26px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3);
-  }
-
-  /* toc */
-  nav.toc {
-    background: var(--surface); border: 1px solid var(--rule);
-    padding: 22px 26px; margin-bottom: 54px; box-shadow: var(--shadow);
-  }
-  nav.toc h2 {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
-    color: var(--text-3); margin: 0 0 14px; font-weight: 400; max-width: none;
-  }
-  nav.toc ol { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 36px; }
-  nav.toc li { break-inside: avoid; margin-bottom: 7px; font-size: 15px; }
-  nav.toc a { color: var(--text); text-decoration: none; display: flex; gap: 11px; }
-  nav.toc a:hover { color: var(--accent); }
-  nav.toc .n {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 12px; color: var(--accent); min-width: 20px;
-  }
-  @media (max-width: 620px) { nav.toc ol { columns: 1; } }
-
-  /* parts */
-  section.part { margin-bottom: clamp(60px,9vw,104px); scroll-margin-top: 20px; }
-  .parthead { border-top: 2px solid var(--text); padding-top: 16px; margin-bottom: 30px; }
-  .partnum {
-    font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
-    color: var(--accent); display: block; margin-bottom: 10px;
-  }
-  h2 {
-    font-size: clamp(25px,3.8vw,38px); line-height: 1.14; font-weight: 700;
-    letter-spacing: -.02em; margin: 0 0 12px; text-wrap: balance; max-width: 22ch;
-  }
-  .parthead p { color: var(--text-2); font-size: 18px; max-width: 62ch; margin: 0; }
-
-  h3 {
-    font-size: 20px; font-weight: 700; margin: 40px 0 12px;
-    letter-spacing: -.01em; line-height: 1.3;
-  }
-  h4 { font-size: 16px; font-weight: 700; margin: 26px 0 8px; }
-  p { margin: 0 0 16px; }
-  ul, ol { margin: 0 0 16px; padding-left: 22px; }
-  li { margin-bottom: 7px; }
-  a { color: var(--accent); text-underline-offset: 3px; }
-  a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-  strong { font-weight: 700; }
-  code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: .88em; background: var(--surface-2); padding: 1px 5px; border-radius: 2px;
-  }
-
-  /* philosophy voice — deliberate register shift */
-  .thesis {
-    font-family: Georgia, "Iowan Old Style", serif;
-    font-size: clamp(20px,2.7vw,26px); line-height: 1.4;
-    border-left: 4px solid var(--accent); background: var(--accent-2);
-    padding: 24px 28px; margin: 30px 0; color: var(--text);
-  }
-  .thesis p { margin: 0 0 12px; }
-  .thesis p:last-child { margin-bottom: 0; }
-  .thesis em { font-style: italic; }
-
-  /* callouts */
-  .box { border: 1px solid var(--rule); background: var(--surface); padding: 20px 24px; margin: 24px 0; box-shadow: var(--shadow); }
-  .box > :last-child { margin-bottom: 0; }
-  .box-label {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 10.5px; letter-spacing: .15em; text-transform: uppercase;
-    display: block; margin-bottom: 9px; color: var(--text-3);
-  }
-  .warn { border-left: 4px solid var(--signal); background: var(--signal-bg); }
-  .warn .box-label { color: var(--signal); }
-  .stop-box { border-left: 4px solid var(--stop); background: var(--stop-bg); }
-  .stop-box .box-label { color: var(--stop); }
-  .good { border-left: 4px solid var(--ok); background: var(--ok-bg); }
-  .good .box-label { color: var(--ok); }
-
-  /* tables */
-  .scroller { overflow-x: auto; margin: 24px 0; }
-  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14.5px; }
-  th, td { padding: 11px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
-  thead th {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--text-3); font-weight: 400; border-bottom: 1px solid var(--rule-2); line-height: 1.35;
-  }
-  tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
-  tbody th { font-weight: 700; font-size: 14.5px; }
-  td.num { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
-
-  /* stats */
-  .stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); border: 1px solid var(--rule); background: var(--surface); margin: 26px 0; box-shadow: var(--shadow); }
-  .stats div { padding: 18px 18px; border-right: 1px solid var(--rule); }
-  .stats div:last-child { border-right: 0; }
-  .stats b {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-variant-numeric: tabular-nums;
-    display: block; font-size: clamp(26px,3.6vw,34px); line-height: 1;
-    letter-spacing: -.03em; margin-bottom: 8px; color: var(--stop);
-  }
-  .stats span { font-size: 13.5px; color: var(--text-2); line-height: 1.4; display: block; }
-  @media (max-width: 660px) { .stats div { border-right: 0; border-bottom: 1px solid var(--rule); } .stats div:last-child { border-bottom: 0; } }
-
-  /* schema block */
-  .schema {
-    background: var(--surface-2); border: 1px solid var(--rule); border-left: 3px solid var(--accent);
-    padding: 18px 20px; font-size: 13px; line-height: 1.85; overflow-x: auto;
-    white-space: pre; margin: 22px 0;
-  }
-  .schema .k { color: var(--accent); }
-  .schema .c { color: var(--text-3); }
-
-  /* tiers */
-  .tiers { display: grid; gap: 14px; margin: 26px 0; }
-  .tier { border: 1px solid var(--rule); background: var(--surface); padding: 18px 22px; box-shadow: var(--shadow); display: grid; grid-template-columns: 60px 1fr; gap: 18px; }
-  .tier-n { font-size: 26px; font-weight: 700; color: var(--accent); line-height: 1; letter-spacing: -.04em; }
-  .tier h4 { margin: 0 0 6px; font-size: 17px; }
-  .tier p { margin: 0 0 8px; font-size: 15px; color: var(--text-2); }
-  .tier p:last-child { margin: 0; }
-  @media (max-width:560px){ .tier { grid-template-columns: 1fr; gap: 8px; } }
-
-  /* roles */
-  .roles { display: grid; grid-template-columns: repeat(auto-fit,minmax(250px,1fr)); gap: 14px; margin: 24px 0; }
-  .role { border: 1px solid var(--rule); border-top: 3px solid var(--accent); background: var(--surface); padding: 16px 18px; box-shadow: var(--shadow); }
-  .role-tag { font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 6px; }
-  .role h4 { margin: 0 0 6px; font-size: 16px; }
-  .role p { font-size: 14.5px; color: var(--text-2); margin: 0; line-height: 1.45; }
-
-  /* qa */
-  details { border: 1px solid var(--rule); background: var(--surface); margin: 10px 0; }
-  summary { cursor: pointer; padding: 14px 20px; font-weight: 700; font-size: 16px; list-style: none; }
-  summary::-webkit-details-marker { display: none; }
-  summary::before { content: "+ "; color: var(--accent); font-family: ui-monospace, monospace; }
-  details[open] summary::before { content: "− "; }
-  details[open] summary { border-bottom: 1px solid var(--rule); }
-  .dbody { padding: 16px 22px 4px; }
-  .dbody > :last-child { margin-bottom: 16px; }
-
-  .sources { columns: 2; column-gap: 34px; font-size: 14px; line-height: 1.5; padding-left: 18px; }
-  .sources li { break-inside: avoid; margin-bottom: 8px; }
-  @media (max-width:640px){ .sources { columns: 1; } }
-
-  hr.soft { border: 0; border-top: 1px solid var(--rule); margin: 34px 0; }
-</style>
 
 <div class="wrap">
 
-<header class="top">
-  <span class="stamp">Working paper · v3 · 28 Aug 2026</span>
+<!-- ═══════════════════════════════════ MASTHEAD ═══ -->
+<header class="masthead">
+  <span class="eyebrow">Research Article &middot; August 2026</span>
   <h1>Capture Once, Govern Many</h1>
-  <p class="sub">Healthcare organizations hold the weakest available compliance obligation because it is the only mandatory one and the alternatives cost six figures to certify. As of mid-2026, four frameworks now specify <em>what</em> AI monitoring must occur — and none specifies <em>how</em> the monitored data is captured. This paper documents that instrumentation gap and proposes an architecture that records each AI interaction once, then applies every framework's control catalog as a view over the same record.</p>
-  <div class="meta">
-    <span>Nicole Cevallos</span>
-    <span>Architecture · Compliance · Business case</span>
-    <span>Healthcare, all segments</span>
-  </div>
+  <p class="deck">A proposed architecture for unified AI governance in healthcare &mdash; one standardized data record, read by every compliance framework at once</p>
+  <div class="byline">Nicole Cevallos &nbsp;&middot;&nbsp; Architecture &amp; Compliance &nbsp;&middot;&nbsp; Healthcare AI Governance</div>
 </header>
 
+<!-- ═══════════════════════════════════════ TOC ════ -->
 <nav class="toc">
   <h2>Contents</h2>
   <ol>
-    <li><a href="#p0"><span class="n">00</span> The argument in one page</a></li>
-    <li><a href="#p1"><span class="n">01</span> The problem, with evidence</a></li>
-    <li><a href="#p2"><span class="n">02</span> The thesis</a></li>
-    <li><a href="#p3"><span class="n">03</span> The architecture</a></li>
-    <li><a href="#p4"><span class="n">04</span> Compliance: what you may claim</a></li>
-    <li><a href="#p5"><span class="n">05</span> Implementation</a></li>
-    <li><a href="#p6"><span class="n">06</span> Beyond hospitals</a></li>
-    <li><a href="#p7"><span class="n">07</span> The business case</a></li>
-    <li><a href="#p8"><span class="n">08</span> What would kill this</a></li>
-    <li><a href="#p9"><span class="n">09</span> Open questions · evidence</a></li>
+    <li><a href="#p1"><span class="n">01</span> Introduction</a></li>
+    <li><a href="#p2"><span class="n">02</span> The Regulatory Baseline: HIPAA</a></li>
+    <li><a href="#p3"><span class="n">03</span> The Broader Compliance Landscape</a></li>
+    <li><a href="#p4"><span class="n">04</span> The AI Oversight Gap</a></li>
+    <li><a href="#p5"><span class="n">05</span> The 2026 Certification Wave</a></li>
+    <li><a href="#p6"><span class="n">06</span> The Architecture</a></li>
+    <li><a href="#paywall"><span class="n">07</span> Collection Methods <span class="locked">&#x1F512;</span></a></li>
+    <li><a href="#paywall"><span class="n">08</span> Implementation <span class="locked">&#x1F512;</span></a></li>
+    <li><a href="#paywall"><span class="n">09</span> Open Questions &amp; Evidence <span class="locked">&#x1F512;</span></a></li>
   </ol>
 </nav>
 
-<!-- ============ 00 ============ -->
-<section class="part" id="p0">
-  <div class="parthead">
-    <span class="partnum">Part 00</span>
-    <h2>Summary of the argument</h2>
-    <p>The full argument in condensed form, followed by its scope and evidentiary limits. Parts 01 through 09 develop, qualify, and attempt to falsify it.</p>
+<!-- ═════════════════════════ 01 INTRODUCTION ════ -->
+<section class="part" id="p1">
+  <div class="part-head">
+    <span class="part-label">Section 01</span>
+    <h2>Introduction</h2>
+    <p class="part-intro">What this article argues, who it is written for, and how its claims are categorized.</p>
   </div>
 
-  <div class="col">
-    <div class="box">
-      <span class="box-label">Scope, method, and evidentiary status</span>
-      <p><strong>What this is.</strong> A working paper that (a) documents a coverage gap between healthcare compliance obligations and the operational surface of deployed AI, and (b) proposes an architecture responding to it. It is a proposal supported by a structured review, not a report of findings.</p>
-      <p><strong>Method.</strong> Structured review of federal rulemaking and executive action, compliance framework documentation and published certification cost data, sector breach statistics, and peer-reviewed literature on deployed clinical AI, covering approximately January 2025 through August 2026. Coverage was assessed by mapping each framework's published control scope against the operational layers of a deployed AI system.</p>
-      <p><strong>What this is not.</strong> No primary data were collected. No implementation of the proposed architecture has been built or evaluated. No organization was studied. Every claim about how the architecture would perform in practice is a hypothesis.</p>
-      <p><strong>Evidentiary convention.</strong> Three classes are used throughout and should be read differently:</p>
-      <ul>
-        <li><strong>Documented</strong> — traceable to a published rule, standard, dataset, or peer-reviewed study. Regulatory timelines, breach statistics, certification costs, and framework scope fall here.</li>
-        <li><strong>Inferred</strong> — a reasoned conclusion from documented facts, where the reasoning rather than the facts may be contested. The coverage gap in §1.4 is inferred.</li>
-        <li><strong>Hypothesis</strong> — asserted without supporting evidence and stated as testable. Every claim about cost, adoption, and effectiveness of the proposed architecture falls here. The two central hypotheses are stated as Propositions 1 and 2 (§2.3, §3.4) and the falsification conditions are given in §8.</li>
-      </ul>
-      <p>Figures throughout derive from secondary reporting and require primary-source verification before citation. See §9.2.</p>
+  <div class="prose">
+    <p>Artificial intelligence is now a routine part of how many American healthcare organizations operate. Tools that flag sepsis risk, suggest diagnostic codes, screen radiology images, pre-authorize procedures, and document clinical encounters are in use across hospitals, health plans, physician practices, and pharmacies. Most were deployed without a common standard for monitoring their ongoing performance. This article examines why that gap exists and proposes a practical way to close it.</p>
+
+    <p>To understand the problem, it helps to first understand the regulatory environment. Most American healthcare organizations are legally required to comply with one federal law &mdash; the Health Insurance Portability and Accountability Act, known as HIPAA. HIPAA is the compliance floor for healthcare. Stronger frameworks exist and are widely recognized in the industry, but they are voluntary and expensive to certify against. Because compliance spending in healthcare is almost entirely obligation-driven, most organizations stay at the floor &mdash; and that floor was designed long before AI became clinically significant.</p>
+
+    <p>This creates a structural gap: the aspects of an AI system that carry the most risk &mdash; whether a model's predictions have grown less reliable over time, whether clinicians are acting on its output, whether it performs differently for different patient populations &mdash; fall largely outside what any mandatory compliance framework currently addresses. Not because organizations are careless, but because the obligations they hold simply do not reach that part of the stack.</p>
+
+    <div class="pullquote">
+      <p>This article proposes that the infrastructure for AI monitoring <em>already exists</em> inside every HIPAA-compliant organization &mdash; in the form of audit logging that federal law already requires. It simply has never been pointed at AI.</p>
     </div>
 
-    <p><strong>The situation.</strong> Almost every healthcare organization holds exactly one compliance obligation: HIPAA. It is the weakest of the available frameworks — its Security Rule has let encryption and multi-factor authentication remain effectively optional for two decades. Stronger frameworks exist. Nobody is required to hold them, and they cost between $35,000 and over $1,000,000 to certify against. So organizations stay at the floor, and healthcare has been the most-breached and costliest-breached sector for fourteen consecutive years.</p>
+    <p>The proposed approach, called &ldquo;Capture Once, Govern Many,&rdquo; standardizes the form of an AI interaction record and then reads that record through multiple compliance lenses. This means the same captured data can satisfy governance requirements across several frameworks without rebuilding the collection infrastructure for each. The architecture is designed to scale down as well as up &mdash; to be viable for a critical access hospital with no dedicated data team, not only for a large health system with a compliance department.</p>
 
-    <p><strong>The AI complication.</strong> Each compliance framework covers a different slice of how an AI system actually runs — infrastructure, vendor, data, model, workflow. HIPAA covers only the data slice, and says nothing about whether a model works, whether it has drifted, or what a human did with its output. An organization holding only HIPAA has no coverage over the part of the stack where AI risk actually lives.</p>
+    <p>This article is written for readers who are not already familiar with healthcare compliance frameworks or AI monitoring systems. Technical terms are explained when they first appear. The claims made throughout fall into three categories, which are labeled explicitly where it matters:</p>
 
-    <p><strong>The separable components.</strong> A compliance framework consists of two things that are usually purchased together but need not be: a published catalog of controls, which is freely available, and a third-party attestation that those controls are in place, which accounts for the cost. An organization can implement the controls without procuring the attestation. It forfeits the certificate and retains whatever protective effect the controls provide — a proposition examined, and flagged as unmeasured, in §7.4.</p>
-
-    <div class="thesis">
-      <p><strong>The architecture.</strong> Every AI interaction is written down as one standard record. Each compliance framework then becomes a <em>lens</em> — a way of reading the same records. HIPAA asks who touched what. A federal-grade lens asks whether the environment drifted. An AI lens asks whether the model still works and whether anyone is overriding it.</p>
-      <p>You pay for capture once. Every lens after the first is nearly free, because the data already exists.</p>
-    </div>
-
-    <p><strong>How the records get written.</strong> Six different methods can fill the same record, from intercepting the call directly to simply reading logs the organization is already legally required to keep. Three of the six require no engineering staff and no vendor cooperation. <strong>The collection method is a choice matched to budget; the record and the lenses stay identical.</strong> That separation is what lets the same architecture serve a national health system and a critical access hospital.</p>
-
-    <p><strong>Why it gets adopted.</strong> It does not ask anyone to start doing a new thing. In its cheapest form it re-points logging that HIPAA already legally requires. The infrastructure is paid for; it is simply aimed at the wrong target. That is what makes this viable for an organization with no security team and no budget — which is the same organization currently getting hit hardest.</p>
+    <ul>
+      <li><strong>Documented</strong> &mdash; traceable to a published regulation, standard, dataset, or peer-reviewed study.</li>
+      <li><strong>Inferred</strong> &mdash; a reasoned conclusion drawn from documented facts, where the reasoning rather than the facts themselves might be contested.</li>
+      <li><strong>Hypothesis</strong> &mdash; an assertion made without direct supporting evidence, stated as something testable. Every claim about how the proposed architecture would perform in practice is a hypothesis. No organization has built and evaluated this system yet.</li>
+    </ul>
   </div>
 </section>
 
-<!-- ============ 01 ============ -->
-<section class="part" id="p1">
-  <div class="parthead">
-    <span class="partnum">Part 01</span>
-    <h2>The problem, with evidence</h2>
-    <p>Four facts, each independently verifiable. Together they define a gap that is real rather than rhetorical.</p>
+<!-- ═════════════════════════ 02 HIPAA ══════════ -->
+<section class="part" id="p2">
+  <div class="part-head">
+    <span class="part-label">Section 02</span>
+    <h2>The Regulatory Baseline: HIPAA</h2>
+    <p class="part-intro">What HIPAA requires, what it does not, and why a two-decade-old distinction still shapes the security posture of most healthcare organizations today.</p>
   </div>
 
-  <div class="col">
-    <h3>1.1 The floor is low on purpose</h3>
-    <p>The HIPAA Security Rule divides its requirements into <strong>"required"</strong> and <strong>"addressable."</strong> In practice, addressable has functioned as optional for twenty years. This is why encryption at rest and multi-factor authentication are still not universal in healthcare.</p>
-    <p>HHS proposed removing that distinction in December 2024 — making encryption and MFA mandatory. That proposal was published in the Federal Register on January 6, 2025, drew more than 4,000 comments, and <strong>has not been finalized.</strong> The target for a final rule is now July 2027.</p>
-    <p>So as of today the weak floor is still the floor, and organizations planning around it have another year or more of ambiguity.</p>
+  <div class="prose">
+    <h3>What HIPAA Is</h3>
+    <p>The Health Insurance Portability and Accountability Act, enacted in 1996, is the primary federal law governing the privacy and security of health information in the United States. Most people are familiar with HIPAA in the context of patient privacy &mdash; the requirement that healthcare providers protect the confidentiality of medical records. But HIPAA also includes a Security Rule, finalized in 2003, that sets technical and administrative standards for safeguarding electronic protected health information, or ePHI.</p>
 
-    <h3>1.2 The consequences are measured and severe</h3>
+    <p>One important point that is frequently misunderstood: <strong>there is no such thing as being &ldquo;HIPAA certified.&rdquo;</strong> HIPAA is a legal obligation, not a certification program. Organizations assert that they are in compliance; no independent third party checks this assertion unless a breach occurs or the government initiates an audit. This is fundamentally different from other frameworks discussed later in this article, where compliance is demonstrated through an external audit that produces a certificate.</p>
+
+    <h3>The Required vs. Addressable Distinction</h3>
+    <p>The Security Rule divides its safeguards into two categories: <em>required</em> specifications, which organizations must implement, and <em>addressable</em> specifications, which organizations must either implement or document a justification for not implementing. In practice, the &ldquo;addressable&rdquo; category has functioned as effectively optional for nearly two decades.</p>
+
+    <div class="box box-def">
+      <span class="box-label">Key Term: Addressable</span>
+      <p>An &ldquo;addressable&rdquo; specification under HIPAA's Security Rule means an organization must assess whether the safeguard is reasonable and appropriate given its size, capabilities, and risk profile. If it determines the safeguard is not appropriate, it must document that determination and implement an equivalent alternative. In practice, this standard has allowed organizations to forgo important security controls without implementing meaningful substitutes.</p>
+    </div>
+
+    <p>The consequences of this flexibility are significant. Encryption at rest &mdash; scrambling stored data so that it is unreadable without a decryption key &mdash; and multi-factor authentication (MFA) &mdash; requiring users to verify their identity through more than one method, such as a password and a phone notification &mdash; have both been classified as addressable. This is why, as of 2026, neither is universal in healthcare, despite being standard practice in virtually every other regulated industry handling sensitive data.</p>
+
+    <h3>The Proposed Update and Its Current Status</h3>
+    <p>The Department of Health and Human Services proposed removing the required/addressable distinction in December 2024, which would make encryption and multi-factor authentication mandatory across all covered entities. That proposal was published in the Federal Register on January 6, 2025, and drew more than 4,000 public comments. As of this writing, it has not been finalized. The current target for a final rule is July 2027.</p>
+
+    <p>This means the weak compliance floor that has characterized healthcare security for twenty years is still in place, and organizations planning around it face another year or more of ambiguity.</p>
+
+    <h3>The Cost of a Low Baseline</h3>
+    <p>Healthcare has been the most-breached and most expensive-to-breach sector in the United States for fourteen consecutive years. The statistics below reflect conditions as of mid-2026 and illustrate the scope of the problem that a decades-old, weakly enforced security standard has produced. <em>(Documented: figures drawn from HHS OCR reporting and industry breach tracking.)</em></p>
   </div>
 
   <div class="stats">
-    <div><b>772</b><span>healthcare breaches affecting 500+ people reported in 2026</span></div>
-    <div><b>2.3</b><span>ransomware attacks per day on healthcare, H1 2026</span></div>
-    <div><b>247</b><span>of 410 H1 ransomware attacks hit direct care providers</span></div>
-    <div><b>$7.42M</b><span>average breach cost — costliest sector 14 years running</span></div>
+    <div><b>772</b><span>healthcare breaches involving 500 or more individuals reported in 2026</span></div>
+    <div><b>2.3</b><span>ransomware attacks per day on healthcare organizations, first half of 2026</span></div>
+    <div><b>247</b><span>of 410 ransomware attacks in H1 2026 struck direct care providers</span></div>
+    <div><b>$7.42M</b><span>average cost of a healthcare data breach &mdash; the costliest sector for 14 consecutive years</span></div>
   </div>
 
-  <div class="col">
-    <h3>1.3 The stronger frameworks are priced out</h3>
-    <div class="scroller">
-      <table>
-        <thead><tr><th>Framework</th><th>What it certifies</th><th>Typical cost to certify</th></tr></thead>
-        <tbody>
-          <tr><th>HIPAA</th><td>Nothing — it is a legal obligation, not a certification</td><td class="num">$0 (no certificate exists)</td></tr>
-          <tr><th>SOC 2</th><td>Service organization controls</td><td class="num">Tens of thousands</td></tr>
-          <tr><th>HITRUST</th><td>Healthcare-harmonized security certification</td><td class="num">$35K–$100K+; one multi-state system exceeded $500K</td></tr>
-          <tr><th>FedRAMP</th><td>Cloud services sold to the federal government</td><td class="num">Hundreds of thousands to $1M+</td></tr>
-          <tr><th>ISO 42001</th><td>AI management system</td><td class="num">Varies; newer, less established in healthcare</td></tr>
-          <tr><th>Joint Commission RUAIH</th><td>Responsible use of AI in healthcare (launched June 2026)</td><td class="num">Fee-based; amounts not yet published</td></tr>
-          <tr><th>URAC Health Care AI</th><td>AI accreditation, developer and user pathways (2025–26)</td><td class="num">Fee-based accreditation</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p>Note the top row carefully, because it is the whole problem in miniature. <strong>There is no such thing as being "HIPAA certified."</strong> HIPAA is an obligation you assert you are meeting. Nobody independently checks unless you are breached or audited. Everything with genuine third-party verification is optional and expensive.</p>
-
-    <h3>1.4 The coverage gap for AI</h3>
-    <p>This is the part that has not been written down anywhere. Each framework governs a different layer of a running AI system:</p>
-  </div>
-
-  <div class="scroller">
-    <table>
-      <thead><tr><th>Framework</th><th>What it actually governs</th><th>Layer of the AI stack</th><th>Silent on</th></tr></thead>
-      <tbody>
-        <tr><th>HIPAA</th><td>Access to patient data, audit controls, transmission security</td><td>Data</td><td>Model quality, drift, workflow, vendor</td></tr>
-        <tr><th>FedRAMP / NIST 800-53</th><td>Cloud security baselines, continuous monitoring, incident response</td><td>Infrastructure the model runs on</td><td>Whether the model is clinically correct</td></tr>
-        <tr><th>SOC 2</th><td>Vendor org controls; processing integrity, availability</td><td>Vendor</td><td>Your local deployment</td></tr>
-        <tr><th>ISO 42001 / NIST AI RMF</th><td>AI risk management, oversight, lifecycle</td><td>Model &amp; management</td><td>Security of the surrounding environment</td></tr>
-        <tr><th>HITRUST</th><td>Harmonizes several of the above for healthcare</td><td>Cross-cutting</td><td>AI-specific behavior</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="col">
-    <p>Stack all of them and you cover infrastructure → vendor → data → model → workflow → user. Hold only HIPAA and you cover <strong>one slice</strong>, and it is not the slice where AI risk concentrates.</p>
-
-    <div class="box warn">
-      <span class="box-label">The gap, stated precisely</span>
-      <p>Organizations required to hold only HIPAA have no compliance-driven visibility into model behavior, model degradation, vendor AI supply chain, or human response to AI output — because no framework they are obligated to hold covers those things.</p>
-      <p>This is not a claim that they are careless. It is a structural observation: <strong>obligation drives implementation, and their obligations stop at the data layer.</strong></p>
-    </div>
-
-    <h3>1.5 Why this is a gap and not a complaint</h3>
-    <p>A complaint says people should try harder. A gap says the incentive structure produces a predictable outcome and can be redesigned. Three properties make this a genuine gap:</p>
-    <ul>
-      <li><strong>It is structural.</strong> The behavior follows from the requirements, not from negligence.</li>
-      <li><strong>It is measurable.</strong> Coverage can be mapped framework by framework, layer by layer.</li>
-      <li><strong>It is addressable without new law.</strong> The remedy does not depend on a rule being finalized, which matters given the July 2027 target.</li>
-    </ul>
-
-    <h3>1.6 The certification wave of mid-2026 — and what it did not change</h3>
-    <p>Between May and June 2026, three private bodies moved into the space federal policy vacated. This development post-dates the first draft of this paper and materially revises its framing. <em>(Documented.)</em></p>
-    <ul>
-      <li><strong>27 May 2026 — CHAI governance playbooks.</strong> The Coalition for Health AI published control catalogs across eight elements (AI policy; organizational structures; organizational resources; lifecycle management; risk and impact assessment; data management; third-party management; education and feedback), developed with 150+ contributors across 100+ organizations. <strong>Free and public.</strong></li>
-      <li><strong>1 June 2026 — Joint Commission RUAIH certification.</strong> A voluntary, fee-based certification open to any U.S. healthcare organization, accredited or not, organized around five areas including <em>"monitoring, evaluating, and validating safety performance."</em></li>
-      <li><strong>2025–26 — URAC Health Care AI accreditation.</strong> Separate developer and user pathways covering model drift management, testing, and ongoing oversight; first organizations now accredited.</li>
-    </ul>
-    <p>A peer-reviewed maturity model also appeared: <strong>HAIRA</strong> (Healthcare AI Governance Readiness Assessment; npj Digital Medicine, February 2026), a five-level model across seven domains derived from a systematic review of 35 frameworks, explicitly motivated by the observation that existing frameworks "assume extensive resources, creating barriers for smaller healthcare organizations."</p>
-
-    <div class="box good">
-      <span class="box-label">What this wave confirms</span>
-      <p>Section 2.2 of this paper argues that a compliance framework decomposes into a free control catalog and a paid attestation, and that the two are separable. In a five-week window, the market performed that separation in public: <strong>one body published the free catalog (CHAI) while two others launched paid attestations over substantially the same ground (Joint Commission, URAC).</strong> A claim that was theoretical in the first draft is now an observed market event with dates.</p>
-    </div>
-
-    <div class="box warn">
-      <span class="box-label">What this wave does not provide</span>
-      <p>All three programs — and HAIRA's monitoring-and-maintenance domain — <strong>specify that organizations must monitor. None specifies how the monitored data is captured.</strong> They are requirement layers without an instrumentation layer. The gap this paper addresses therefore narrows but does not close: it moves from "no framework exists" (no longer true) to "four frameworks now specify <em>what</em> to monitor and none specifies <em>how</em> to capture it — and the organizations all four claim to serve are precisely those least able to build capture."</p>
-    </div>
+  <div class="prose">
+    <p>These numbers are not offered as evidence that HIPAA failed &mdash; it was not designed to prevent ransomware. They are offered as evidence that the baseline it sets, even when organizations comply fully with it, leaves a great deal of risk unaddressed. Understanding that gap is the first step toward understanding why stronger frameworks exist and why the AI compliance problem is as significant as it is.</p>
   </div>
 </section>
 
-<!-- ============ 02 ============ -->
-<section class="part" id="p2">
-  <div class="parthead">
-    <span class="partnum">Part 02</span>
-    <h2>The thesis</h2>
-    <p>Four ideas. The first three are arguments; the fourth is the consequence you are obligated to state out loud.</p>
-  </div>
-
-  <div class="col">
-    <h3>2.1 Governance is architecture, not policy</h3>
-    <p>There are two ways to enforce any rule. <strong>Policy enforcement</strong> writes it down, trains people, and audits later. <strong>Architectural enforcement</strong> makes the wrong behavior structurally difficult.</p>
-    <p>Healthcare AI governance today is almost entirely the first kind, which is why audit trails are a project someone has to go do rather than a byproduct of the system running. The security field already made this transition — from "do not share your password" to single sign-on and MFA. Nobody complies with a badge reader. They simply cannot get in without one.</p>
-
-    <h3>2.2 Controls are free; certification is what costs money</h3>
-    <p>This is the economic core, and it is frequently misunderstood even by people who work in compliance.</p>
-    <p>A framework consists of a <strong>control catalog</strong> — a published, public list of what you must do — and an <strong>attestation</strong>, a third-party audit that proves you did it. NIST 800-53 is a free public document. The FedRAMP baselines built on it are public. ISO catalogs are purchasable for a nominal fee.</p>
-
-    <div class="thesis">
-      <p>You do not pay an assessor to <em>implement</em> a control. You pay them to <em>vouch</em> for it.</p>
-      <p>An organization that cannot afford HITRUST can still implement HITRUST-grade controls. It forfeits the badge and keeps the protection.</p>
-    </div>
-
-    <h3>2.3 Compliance already built the infrastructure</h3>
-    <p>HIPAA's Security Rule requires audit controls — mechanisms that record and examine activity in systems containing electronic protected health information. In plain terms: <strong>you are already legally required to log who did what, to which patient's data, and when.</strong></p>
-    <p>Now consider what an AI monitoring system needs: who, what, when, which patient, which model, what happened next.</p>
-    <p>It is very nearly the same data. The audit infrastructure AI governance requires has been mandatory for two decades. It has simply never been pointed at AI.</p>
-
-    <div class="box">
-      <span class="box-label">Proposition 1 — testable</span>
-      <p>If audit infrastructure mandated under the HIPAA Security Rule is sufficient to answer governance questions about AI, then the marginal cost of AI monitoring at an organization already meeting HIPAA obligations is substantially lower than currently assumed by that organization.</p>
-      <p><strong>Test:</strong> at a sample of organizations, attempt to answer a defined set of AI governance questions using only existing audit log and interface message data. Record how many are answerable, and what specifically blocks the rest. A negative result — that existing logs are insufficient — would falsify the central economic claim of this document and is a plausible outcome. See §3.3 and §8.</p>
-    </div>
-
-    <h3>2.4 Capture once, govern many</h3>
-    <p>One wrapper writes one event stream. Each framework becomes a lens over that same stream. The first lens carries the full cost of instrumentation; the fifth lens costs almost nothing, because the data is already being captured.</p>
-    <p>This is why the approach scales down rather than only up — and scaling <em>down</em> is the hard direction that nothing else in this market does.</p>
-
-    <h3>2.5 The consequence you must state</h3>
-    <p>Local evaluation capacity in healthcare tracks with system membership and operating margin. Well-resourced organizations validate their AI. Under-resourced ones deploy the same models to populations that were often absent from the training data, with nobody checking.</p>
-    <div class="thesis">
-      <p>Deregulation does not eliminate the safety burden. It <em>means-tests</em> it.</p>
-    </div>
-    <p>Any framework that only works at organizations with a data science team reproduces that divide. The tiering in Part 05 is not a nicety — it is the difference between a solution and a market segment.</p>
-  </div>
-</section>
-
-<!-- ============ 03 ============ -->
+<!-- ═════════════════════════ 03 FRAMEWORKS ═════ -->
 <section class="part" id="p3">
-  <div class="parthead">
-    <span class="partnum">Part 03</span>
-    <h2>The architecture</h2>
-    <p>Concrete enough to build from. Terms defined as they appear.</p>
+  <div class="part-head">
+    <span class="part-label">Section 03</span>
+    <h2>The Broader Compliance Landscape</h2>
+    <p class="part-intro">The frameworks that go further than HIPAA, what each one covers, and why the cost of formal certification keeps most healthcare organizations from pursuing them.</p>
   </div>
 
-  <div class="col">
-    <h3>3.1 Two fixed parts, one pluggable part</h3>
-    <p>The architecture has exactly two things that must not vary, and one that must:</p>
-    <ul>
-      <li><strong>Fixed — the event record.</strong> The standard shape of "an AI thing happened."</li>
-      <li><strong>Fixed — the lenses.</strong> Compliance views computed over those records.</li>
-      <li><strong>Pluggable — the collector.</strong> However the record gets filled in.</li>
-    </ul>
+  <div class="prose">
+    <p>A range of compliance frameworks exists beyond HIPAA, each addressing different aspects of information security, system trustworthiness, and, increasingly, the governance of artificial intelligence. Understanding what each framework covers &mdash; and what it costs &mdash; is essential context for understanding the gap this article addresses.</p>
 
-    <div class="box good">
-      <span class="box-label">The design decision that makes this work</span>
-      <p>It is tempting to treat interception as the architecture. It is not. Interception is one collector, it requires engineering staff, and it structurally cannot reach AI embedded inside a vendor's product — which is a large share of the AI that matters.</p>
-      <p><strong>Separating the collector from the record is what lets the same architecture serve a national system and a twenty-five-bed rural hospital.</strong> It is also what prevents an EHR vendor from making the whole approach irrelevant by shipping their own version: they can own one collector; they cannot own the record or the lenses across every vendor an organization uses.</p>
-    </div>
+    <h3>The Major Frameworks</h3>
 
-    <h3>3.2 The event — the thing everything else reads</h3>
-    <p>Every AI interaction emits one record. This schema is the single most important artifact in the whole design, because every lens is a query against it.</p>
-  </div>
+    <h4>SOC 2 &mdash; Service Organization Control 2</h4>
+    <p>SOC 2 is an auditing framework developed by the American Institute of Certified Public Accountants (AICPA). It evaluates the controls a service organization has in place around five &ldquo;trust service criteria&rdquo;: security, availability, processing integrity, confidentiality, and privacy. SOC 2 reports are issued by independent auditors and are widely requested by enterprise customers as a condition of doing business with a software or cloud services vendor.</p>
+    <p>In healthcare, digital health companies and AI vendors frequently pursue SOC 2 certification because their hospital and health system customers require it contractually. Direct care providers &mdash; hospitals, physician practices, home health agencies &mdash; are far less likely to certify against SOC 2.</p>
 
-  <div class="schema"><span class="c"># one record per AI interaction</span>
-<span class="k">event_id</span>          unique id
-<span class="k">timestamp</span>         when
-<span class="k">actor_id</span>          who invoked it (person or service)
-<span class="k">actor_role</span>        clinician / coder / reviewer / automated
-<span class="k">subject_ref</span>       patient or claim or member reference
-<span class="k">encounter_ref</span>     the episode this belongs to
-<span class="k">deployment_id</span>     model + population + workflow + version
-<span class="k">purpose</span>           why this call was made
-<span class="k">input_ref</span>         pointer + hash (never the payload itself)
-<span class="k">output_summary</span>    score / class / action recommended
-<span class="k">confidence</span>        if the model exposes one
-<span class="k">latency_ms</span>        performance
-<span class="k">egress_target</span>     where data went; BAA status of that endpoint
-<span class="k">human_action</span>      accepted / modified / rejected / ignored
-<span class="k">action_latency</span>    time from output to human action
-<span class="k">artifact_ref</span>      note, order, denial, report produced
-<span class="k">downstream_ref</span>    outcome linkage, filled in later</div>
+    <h4>HITRUST &mdash; Health Information Trust Alliance</h4>
+    <p>HITRUST, sometimes called the HITRUST CSF (Common Security Framework), is a healthcare-specific security certification that harmonizes requirements from several other frameworks, including HIPAA, SOC 2, ISO 27001, and NIST guidelines. Because it was designed specifically for healthcare, it accounts for the regulatory complexity of the sector and is recognized by regulators and large payers.</p>
+    <p>HITRUST certification is considered the gold standard of healthcare security compliance. It requires an independent assessment by a HITRUST-authorized evaluator and is significantly more expensive and time-consuming than most other certifications. A small healthcare organization might spend $35,000 to $100,000 on a single HITRUST certification cycle; a large multi-state system has exceeded $500,000. These costs recur on certification renewal cycles of one to two years.</p>
 
-  <div class="col">
-    <div class="box">
-      <span class="box-label">Three design rules that are not negotiable</span>
-      <ul>
-        <li><strong>Store references, never payloads.</strong> The log holds pointers and hashes, not patient data. This keeps the monitoring layer out of scope for a great deal of risk and makes it far easier to approve.</li>
-        <li><strong><code>deployment_id</code>, not <code>model_id</code>.</strong> The same model in two settings is two governed objects with separate baselines and separate retirement dates. Collapsing them is the most common and most consequential modeling error in this space.</li>
-        <li><strong><code>human_action</code> is mandatory.</strong> It is the field nobody captures and the one that carries the most information. A model with a 94% override rate is not performing well; it is furniture, and it is still producing alert fatigue.</li>
-      </ul>
-    </div>
+    <h4>FedRAMP &mdash; Federal Risk and Authorization Management Program</h4>
+    <p>FedRAMP is a U.S. government program that certifies cloud service providers for use by federal agencies. It is based on NIST Special Publication 800-53, a comprehensive catalog of security and privacy controls. While FedRAMP is primarily relevant to vendors selling cloud services to the government, its underlying control catalog &mdash; NIST 800-53 &mdash; is widely used as a reference standard in healthcare, particularly by organizations that have government contracts or that want to demonstrate security rigor beyond what HIPAA requires.</p>
+    <p>Full FedRAMP authorization is among the most expensive certifications in the compliance landscape, with costs ranging from hundreds of thousands of dollars to over one million.</p>
 
-    <h3>3.3 The six collectors</h3>
-    <p>Six distinct methods can fill the event record. They differ in what they can see, what they cost, and whether they work on AI the organization does not control.</p>
+    <h4>ISO 42001 &mdash; AI Management System</h4>
+    <p>The International Organization for Standardization published ISO 42001 in 2023 as the first international standard for artificial intelligence management systems. It provides a framework for organizations to identify, assess, and mitigate risks associated with AI, covering the full lifecycle from design to decommissioning. As of mid-2026, ISO 42001 is newer and less established in healthcare than the frameworks above, though adoption is growing, particularly among AI developers.</p>
 
-    <h4>A · Intercept the call</h4>
-    <p>A <strong>wrapper</strong> (also called a shim or middleware) is a small piece of code that sits <em>around</em> an existing function to add logging — <strong>without opening or modifying the original.</strong> Highest fidelity: input, output, timing, requester, all in real time.</p>
-    <p><em>Constraint:</em> requires engineering staff and a call path you control. Cannot reach AI running entirely inside a vendor's product.</p>
+    <h4>NIST AI RMF &mdash; AI Risk Management Framework</h4>
+    <p>The National Institute of Standards and Technology released its AI Risk Management Framework in January 2023. Unlike ISO 42001, the NIST AI RMF is not a certification program &mdash; it is a voluntary guidance document organized around four functions: Govern, Map, Measure, and Manage. Healthcare organizations and AI developers use it as a structured approach to thinking about AI risk, but it does not produce a certificate.</p>
 
-    <h4>B · Read what is already written</h4>
-    <p>Intercept nothing. Read the records the organization already produces: EHR audit logs, application logs, database change streams, and — most importantly in healthcare — the <strong>HL7 and FHIR message traffic already flowing through the interface engine that virtually every provider organization runs.</strong></p>
-    <p>This is the most thesis-consistent collector available. HIPAA already mandates the audit logs. Federal interoperability rules already mandate FHIR access, and the current policy direction is toward more standardized API access, not less. Nothing new is built; an existing, legally required pipe is read.</p>
-    <p><em>Constraint:</em> sees artifacts and access, not the model call itself. And healthcare log quality is genuinely poor — see the caveat below.</p>
+    <h4>Joint Commission RUAIH (Launched June 2026)</h4>
+    <p>The Joint Commission launched the Responsible Use of AI in Healthcare (RUAIH) certification in June 2026. This is a voluntary, fee-based certification available to any U.S. healthcare organization, whether or not it already holds Joint Commission accreditation. RUAIH is organized around five areas, including monitoring, evaluating, and validating AI safety performance.</p>
 
-    <h4>C · Instrument the interface</h4>
-    <p>Capture at the point of use — an in-EHR application, browser-level instrumentation, or session telemetry. The only collector that reliably observes <strong>what a person actually saw and did.</strong></p>
-    <p><em>Constraint:</em> moderate cost and a real consent and trust burden. Politically the most sensitive of the six.</p>
+    <h4>URAC Health Care AI Accreditation (2025&ndash;2026)</h4>
+    <p>URAC introduced a Health Care AI accreditation program in 2025&ndash;2026, with separate pathways for AI developers and AI users. The program covers areas including model drift management, ongoing oversight, and testing protocols. The first organizations received URAC AI accreditation in 2026.</p>
 
-    <h4>D · Test from outside — proficiency testing for algorithms</h4>
-    <p>Observe no real traffic at all. On a schedule, submit cases whose correct answer is already known and record what comes back.</p>
-    <div class="box good">
-      <span class="box-label">The precedent that makes this immediately legible</span>
-      <p>Clinical laboratories are <strong>legally required under CLIA to do exactly this</strong> — periodically run specimens with known values through their instruments to demonstrate continued accuracy. It is called proficiency testing, it has been standard practice for decades, and no laboratorian needs it explained.</p>
-      <p><strong>Nobody does it for algorithms.</strong> Proposing it is not proposing a new concept; it is proposing an accepted quality mechanism for a new object. It requires no integration, no vendor cooperation, no model access, and almost no money — which makes it the only high-value collector genuinely available to an organization with zero technical staff.</p>
-    </div>
-    <p><em>Constraint:</em> says nothing about real usage or human behavior. Detects capability decay, not deployment failure.</p>
-
-    <h4>E · Compare against a reference</h4>
-    <p>Run a known-good model in parallel and record divergence. Detects drift in a production model without opening either one.</p>
-    <p><em>Constraint:</em> needs compute and a defensible reference. Justified for high-volume, high-stakes deployments only.</p>
-
-    <h4>F · Ask</h4>
-    <p>Scheduled attestations, a reporting channel for anomalous AI output, and periodic random review of AI-touched records.</p>
-    <p>The weakest signal and the cheapest — but the only one that catches <strong>semantic</strong> failure: output that is fluent, plausible, well-formed, and wrong. No instrumentation will ever find that. An AI incident-reporting channel is startlingly rare in practice and is the closest available analog to how drug safety monitoring actually works.</p>
+    <h3>Why Most Organizations Do Not Certify</h3>
+    <p>The following table summarizes these frameworks and their approximate certification costs.</p>
   </div>
 
   <div class="scroller">
     <table>
-      <thead><tr><th>Collector</th><th>Sees the call</th><th>Sees the artifact</th><th>Sees the human</th><th>Works on vendor AI</th><th>Needs engineers</th><th>Cost</th></tr></thead>
+      <thead>
+        <tr><th>Framework</th><th>What it certifies or governs</th><th>Typical certification cost</th></tr>
+      </thead>
       <tbody>
-        <tr><th>A · Intercept</th><td>Full</td><td>Full</td><td>Partial</td><td>No</td><td>Yes</td><td>High</td></tr>
-        <tr><th>B · Read existing</th><td>No</td><td>Full</td><td>Partial</td><td>Yes</td><td>Some</td><td>Low</td></tr>
-        <tr><th>C · Interface</th><td>Partial</td><td>Full</td><td>Full</td><td>Yes</td><td>Yes</td><td>Medium</td></tr>
-        <tr><th>D · Proficiency testing</th><td>Full</td><td>No</td><td>No</td><td>Yes</td><td>No</td><td>Very low</td></tr>
-        <tr><th>E · Reference model</th><td>No</td><td>Full</td><td>No</td><td>Yes</td><td>Yes</td><td>Medium</td></tr>
-        <tr><th>F · Ask</th><td>No</td><td>Partial</td><td>Full</td><td>Yes</td><td>No</td><td>Very low</td></tr>
+        <tr><th>HIPAA</th><td>Data privacy and security for covered healthcare entities &mdash; a legal obligation, not a certification. No certificate exists; compliance is self-asserted.</td><td class="num">$0 (no certificate)</td></tr>
+        <tr><th>SOC 2</th><td>Service organization security, availability, and integrity controls</td><td class="num">Tens of thousands of dollars</td></tr>
+        <tr><th>HITRUST CSF</th><td>Healthcare-harmonized security certification; the sector's most recognized standard</td><td class="num">$35K&ndash;$500K+ depending on scope</td></tr>
+        <tr><th>FedRAMP (NIST 800-53)</th><td>Cloud services sold to the U.S. federal government</td><td class="num">Hundreds of thousands to $1M+</td></tr>
+        <tr><th>ISO 42001</th><td>Artificial intelligence management systems</td><td class="num">Varies; newer and less established</td></tr>
+        <tr><th>NIST AI RMF</th><td>AI risk governance guidance &mdash; voluntary framework, not a certification</td><td class="num">$0 (guidance document only)</td></tr>
+        <tr><th>Joint Commission RUAIH</th><td>Responsible use of AI in healthcare (launched June 2026)</td><td class="num">Fee-based; amounts not yet published</td></tr>
+        <tr><th>URAC Health Care AI</th><td>AI accreditation, developer and user pathways (2025&ndash;2026)</td><td class="num">Fee-based accreditation</td></tr>
       </tbody>
     </table>
   </div>
 
-  <div class="col">
-    <p>Read the last three columns together. <strong>B, D, and F all work on AI the organization does not control, and all three are cheap.</strong> Interception — the highest-fidelity option — works in the fewest situations and costs the most. Any framework that assumes interception has quietly restricted itself to well-resourced organizations governing only the AI they built themselves.</p>
+  <div class="prose">
+    <p>The pattern is immediately visible: everything beyond HIPAA is voluntary and costs significant money. Healthcare compliance spending is almost entirely mandate-driven &mdash; organizations implement what they are legally required to implement and rarely go beyond it.</p>
 
-    <div class="box warn">
-      <span class="box-label">The honest caveat on Collector B</span>
-      <p>Healthcare audit logs are frequently incomplete, inconsistently formatted, and retained for varying periods. "HIPAA requires the logs" and "the logs are usable" are different claims, and the gap between them is the single largest execution risk in the cheap tier.</p>
-      <p><strong>Test this before designing around it.</strong> Pull thirty days of audit log from one system and try to answer one governance question. That exercise costs a day and determines whether Collector B is viable at that organization.</p>
+    <div class="box box-def">
+      <span class="box-label">Key Insight: Controls vs. Certification</span>
+      <p>A compliance framework consists of two separable components. The first is a <strong>control catalog</strong> &mdash; a published list specifying what an organization must do. Most of these catalogs are freely available: NIST 800-53 is a public document, the FedRAMP baselines built on it are public, and the NIST AI RMF is freely downloadable. The second is an <strong>attestation</strong> &mdash; a third-party audit confirming that the controls are actually in place. This is where the expense lies.</p>
+      <p>An organization can implement HITRUST-level controls without paying for a HITRUST certificate. It forfeits the badge, but retains whatever protective effect those controls provide. This distinction is central to the architecture proposed in Section 06.</p>
     </div>
-
-    <h3>3.4 Collector tiering</h3>
-    <p>Collectors are not competitors. They are a portfolio selected against budget and technical capacity. The tiering below is the default recommendation.</p>
-  </div>
-
-  <div class="tiers">
-    <div class="tier">
-      <span class="tier-n">C0</span>
-      <div>
-        <h4>Day one, any organization — B + D + F</h4>
-        <p>Read the logs and message streams that already exist. Run proficiency tests against the top three deployments. Open an AI incident reporting channel.</p>
-        <p><strong>No engineering staff. No vendor cooperation. No new infrastructure.</strong> This tier alone produces HIPAA audit evidence, capability-decay detection, and a semantic failure channel — three things most large health systems currently lack.</p>
-      </div>
-    </div>
-    <div class="tier">
-      <span class="tier-n">C1</span>
-      <div>
-        <h4>With an engineering team — add A</h4>
-        <p>Interception on systems the organization actually controls: internally built tools, API-based services, agents. Adds real-time call visibility and confidence data where it is obtainable.</p>
-      </div>
-    </div>
-    <div class="tier">
-      <span class="tier-n">C2</span>
-      <div>
-        <h4>Where stakes justify it — add C or E</h4>
-        <p>Interface instrumentation where human behavior is the risk. Reference-model comparison where drift in a high-volume deployment would be consequential.</p>
-        <p>Neither is a general requirement. Both are expensive enough that they should be triggered by a specific named risk, not adopted by default.</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="col">
-    <div class="box">
-      <span class="box-label">Proposition 2 — testable, and the strongest claim made here</span>
-      <p>The equity argument in §2.5 holds only if the lowest collector tier produces non-trivial detection. If C0 amounts to record-keeping, the document concedes that meaningful governance requires capital.</p>
-      <p><strong>Claim:</strong> an organization running only C0 collectors detects classes of failure — capability decay via proficiency testing, semantic error via incident reporting — that a well-resourced organization running a conventional model-monitoring platform does not currently detect, because conventional platforms monitor model outputs rather than model capability or human-observed error.</p>
-      <p><strong>Test:</strong> instrument one small and one large organization; compare the failure classes each surfaces over a fixed period. If the small site surfaces failure classes the large site misses, the expected relationship between resources and safety is at least partially inverted. This is a strong claim and is currently unevidenced.</p>
-    </div>
-
-    <h3>3.5 The lens model</h3>
-    <p>A <strong>lens</strong> is a read-only analysis over the event record, derived from one framework's control catalog. Lenses share the record and never share code paths, so a new one can be added without touching collection.</p>
-
-    <div class="box">
-      <span class="box-label">How a lens is derived — the rule, so this is a method and not a list</span>
-      <p>For each control in a framework's catalog, ask: <em>what observable fact in the event record would demonstrate this control is operating?</em> If an answer exists, that control joins a lens. If none exists, the control is out of scope and must be stated as out of scope.</p>
-      <p>This matters because it makes coverage <strong>auditable rather than asserted.</strong> A buyer can be handed the catalog, the mapping, and the list of controls deliberately excluded — which is a far stronger position than claiming alignment in the abstract.</p>
-    </div>
-
-    <p>Lenses are not equally mature. The first four below are direct translations of existing control catalogs. The last three are constructions, and should be labeled as such.</p>
-    <p><strong>The mid-2026 catalogs are new lens sources.</strong> The CHAI playbooks' eight elements and the Joint Commission certification's five standard areas are both derivable as lenses under the rule above — and because the CHAI catalogs are free and public, they are the natural first healthcare-native derivation alongside HIPAA. An organization pursuing certification then holds a running head start: the monitoring evidence the certifier asks for is a query against records already being captured.</p>
-  </div>
-
-  <div class="scroller">
-    <table>
-      <thead><tr><th>Lens</th><th>Derived from</th><th>Questions it answers</th></tr></thead>
-      <tbody>
-        <tr><th>Access</th><td>HIPAA audit controls</td><td>Who reached which record, was it minimum-necessary, any anomalous access pattern</td></tr>
-        <tr><th>Boundary</th><td>HIPAA transmission security; BAA obligations</td><td>Did data leave to a non-covered endpoint; is there unsanctioned tool usage</td></tr>
-        <tr><th>Environment</th><td>NIST 800-53 / FedRAMP continuous monitoring</td><td>Configuration drift, unexpected version changes, incident indicators</td></tr>
-        <tr><th>Integrity</th><td>SOC 2 processing integrity</td><td>Are outputs complete, timely, and consistent; failure and retry rates</td></tr>
-        <tr><th>Model</th><td>NIST AI RMF Measure; ISO 42001</td><td>Local accuracy, subgroup performance, drift, calibration decay</td></tr>
-        <tr><th>Human</th><td>No framework — this one is new</td><td>Override rate, response latency, workflow behavior change over time</td></tr>
-        <tr><th>Equity</th><td>Civil rights obligations; NIST AI RMF fairness</td><td>Do outcomes differ across populations you serve</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="col">
-    <p>The <strong>Human lens</strong> deserves special attention because no compliance framework requires it and it captures a documented harm the others structurally cannot see: <em>the model performs correctly and the people using it degrade.</em> This is the most original component of the design.</p>
-
-    <div class="box warn">
-      <span class="box-label">Design constraint on the Human lens</span>
-      <p>Monitor and alert at the <strong>cohort</strong> level. Never surface individual scorecards. The moment this becomes a performance management tool, the people being measured will block it, game it, or grieve it — and you will have destroyed the signal in order to build a dashboard nobody trusts.</p>
-      <p>Frame it as <strong>device surveillance, not employee surveillance.</strong> You are measuring what the tool does to practice, not who is underperforming.</p>
-    </div>
-
-    <h3>3.6 Where it runs</h3>
-    <p>Two deployment patterns, and the vocabulary matters because using the wrong term will get you dismissed by technical buyers.</p>
-    <p><strong>Air-gapped</strong> means nothing enters or leaves — ever. No internet, no updates; model weights arrive on encrypted media with chain of custody. Real, but rarely what anyone actually wants, because results need to get out.</p>
-    <p><strong>Controlled egress</strong> means data goes in and stays in, the model runs inside with no outbound connection, and <strong>only reviewed outputs leave.</strong> This is what almost every regulated deployment actually is, and it is the correct pattern here.</p>
-
-    <div class="box good">
-      <span class="box-label">Precedent worth citing</span>
-      <p>The CMS Virtual Research Data Center already operates this way: researchers analyze data inside a CMS-managed environment, beneficiary-identifiable data never leaves, and only aggregate output exits after a disclosure review.</p>
-      <p>You are not proposing an unproven architecture. You are proposing that a pattern the federal government already validated should be standard, with AI governance inside it.</p>
-    </div>
-
-    <h3>3.7 What the architecture cannot do</h3>
-    <div class="box warn">
-      <span class="box-label">Vendor-embedded AI — the residual gap</span>
-      <p>Collectors B, D and F reach vendor AI far better than interception does, but coverage is still partial: proficiency testing shows whether a vendor model still performs, and log reading shows what it produced, while neither reveals the call itself or a confidence value.</p>
-      <p><strong>The remainder is a contracting problem, not an engineering one.</strong> Require an attested telemetry feed as a condition of purchase, and make "provides neither an interceptable path, a readable artifact trail, nor a telemetry feed" a disqualifying property in procurement. When something cannot be solved in code, solve it in the contract — and let the architecture dictate the contract term.</p>
-    </div>
-    <ul>
-      <li><strong>It cannot see inside a model.</strong> No explainability, no weights, no training data. By design.</li>
-      <li><strong>It cannot establish causation.</strong> Correlated change is not caused change; say so before a reviewer does.</li>
-      <li><strong>Outcome labels lag.</strong> Near-term you are measuring process, not outcomes.</li>
-      <li><strong>Generative output evaluation is unsolved.</strong> There is no ground truth for a clinical note. Edit distance and omission rate are proxies, not validation — and this is where the highest-volume AI lives. Do not overclaim here; it is the fastest way to lose credibility with a technical audience.</li>
-      <li><strong>It must fail open.</strong> A monitoring layer that takes down clinical systems during an outage will be removed within a week, correctly. Which means it cannot double as a hard availability control.</li>
-    </ul>
   </div>
 </section>
 
-<!-- ============ 04 ============ -->
+<!-- ═════════════════════════ 04 AI GAP ══════════ -->
 <section class="part" id="p4">
-  <div class="parthead">
-    <span class="partnum">Part 04</span>
-    <h2>Compliance: what you may claim</h2>
-    <p>The single most dangerous section. Overstating here is how this concept gets someone sued.</p>
+  <div class="part-head">
+    <span class="part-label">Section 04</span>
+    <h2>The AI Oversight Gap</h2>
+    <p class="part-intro">What happens when an AI system is deployed inside a healthcare organization, and what each compliance framework does &mdash; and does not &mdash; address about that deployment.</p>
   </div>
 
-  <div class="col">
-    <div class="box stop-box">
-      <span class="box-label">Claims that are factually incorrect</span>
-      <ul>
-        <li><strong>"HIPAA certified."</strong> No such thing exists. Anyone who says it identifies themselves as uninformed.</li>
-        <li><strong>"FedRAMP compliant."</strong> FedRAMP is an authorization granted through a specific government process. You are either authorized or you are not.</li>
-        <li><strong>"HITRUST certified"</strong> without a certificate. This is a trademarked program with a defined assessment.</li>
-        <li><strong>"This makes you compliant."</strong> Compliance is an organizational state involving policy, training, contracts, and physical safeguards. Software is one input.</li>
-      </ul>
-    </div>
+  <div class="prose">
+    <h3>How an AI System Actually Works in a Healthcare Setting</h3>
+    <p>To understand the compliance gap, it helps to think through what deploying an AI system actually involves. Consider a hospital that adopts a commercial tool that uses artificial intelligence to flag patients at elevated risk for sepsis &mdash; a life-threatening response to infection. When a clinician orders labs on an at-risk patient, the AI tool analyzes the results, generates a risk score, and surfaces an alert in the electronic health record (EHR).</p>
 
-    <h4>The defensible formulation</h4>
-    <p><strong>"Implements controls aligned to [framework]."</strong> Accurate, defensible, and still valuable. You can go further and publish a control mapping — which control, which lens, what evidence it produces — so a buyer can verify the claim themselves.</p>
+    <p>This single scenario involves several distinct layers of technology and process:</p>
 
-    <h3>4.1 The mapping is the product</h3>
-    <p>For a compliance buyer, the mapping table <em>is</em> the deliverable. It converts a monitoring tool into audit evidence, which is what they are actually purchasing.</p>
+    <ul>
+      <li><strong>Infrastructure:</strong> The servers, cloud environment, or data center where the AI model runs.</li>
+      <li><strong>Data:</strong> The patient information the model accesses &mdash; lab values, vital signs, prior diagnoses. This is the layer most familiar from HIPAA discussions.</li>
+      <li><strong>Vendor:</strong> The company that built and maintains the AI tool and their security controls.</li>
+      <li><strong>The model itself:</strong> The AI's ongoing accuracy. A model trained on data from large academic medical centers may perform differently in a rural community hospital. A model that was accurate when deployed may become less accurate over time as patient populations shift &mdash; a phenomenon called <em>model drift</em>.</li>
+      <li><strong>Workflow and human response:</strong> What clinicians actually do with the AI's output. A model that is technically accurate but consistently overridden has a very different risk profile than one that is heeded.</li>
+    </ul>
+
+    <h3>What Each Framework Actually Governs</h3>
+    <p>When mapped against these layers, a striking pattern emerges: each compliance framework addresses a different slice of a deployed AI system, and the slices do not add up to the whole. <em>(Inferred: this mapping is the article's own analysis.)</em></p>
   </div>
 
   <div class="scroller">
     <table>
-      <thead><tr><th>Control family</th><th>Framework source</th><th>Lens that satisfies evidence</th><th>Artifact produced</th></tr></thead>
+      <thead>
+        <tr><th>Framework</th><th>What it primarily governs</th><th>Layer addressed</th><th>What it does not address</th></tr>
+      </thead>
       <tbody>
-        <tr><th>Audit controls</th><td>HIPAA Security Rule</td><td>Access</td><td>Complete activity record with actor and subject</td></tr>
-        <tr><th>Transmission security</th><td>HIPAA Security Rule</td><td>Boundary</td><td>Egress log with endpoint BAA status</td></tr>
-        <tr><th>Continuous monitoring</th><td>NIST 800-53 / FedRAMP</td><td>Environment</td><td>Config and version drift record</td></tr>
-        <tr><th>Processing integrity</th><td>SOC 2</td><td>Integrity</td><td>Completeness, error and retry rates</td></tr>
-        <tr><th>Measurement of AI risk</th><td>NIST AI RMF (Measure)</td><td>Model, Human</td><td>Local performance and drift reports</td></tr>
-        <tr><th>AI management system</th><td>ISO 42001</td><td>All</td><td>Deployment inventory with lifecycle state</td></tr>
-        <tr><th>Human oversight</th><td>ISO 42001; state AI laws</td><td>Human</td><td>Override and review-rate evidence</td></tr>
+        <tr><th>HIPAA</th><td>Who can access patient data, how it must be secured, and how its transmission must be protected</td><td>Data</td><td>Model accuracy, model drift, clinical workflow, vendor AI supply chain</td></tr>
+        <tr><th>FedRAMP / NIST 800-53</th><td>Security baselines for cloud environments, continuous monitoring</td><td>Infrastructure</td><td>Whether the model itself is clinically correct or performing as expected</td></tr>
+        <tr><th>SOC 2</th><td>The vendor organization's own controls around security, availability, and data handling</td><td>Vendor</td><td>The organization's own deployment of the vendor's tool</td></tr>
+        <tr><th>ISO 42001 / NIST AI RMF</th><td>AI risk management processes, human oversight requirements</td><td>Model and management</td><td>Security of the surrounding environment; integration with existing compliance obligations</td></tr>
+        <tr><th>HITRUST</th><td>A cross-cutting healthcare security standard that harmonizes several of the above</td><td>Cross-cutting</td><td>AI-specific behavior, model performance, or human response to AI output</td></tr>
       </tbody>
     </table>
   </div>
 
-  <div class="col">
-    <h3>4.2 The objection that will come from legal</h3>
-    <p>The following is the most consequential objection raised against monitoring systems of this kind, and it is raised by legal counsel rather than by technical staff:</p>
-    <div class="box warn">
-      <span class="box-label">"You are creating discoverable evidence against us."</span>
-      <p>It is a real concern. A monitoring system that documents a model performing poorly, in an organization that then did nothing, produces the plaintiff's exhibit.</p>
-      <p><strong>The honest answer has three parts.</strong> First, it cuts both ways: documented monitoring with documented response is the strongest available evidence that an organization exercised reasonable care. Second, the alternative is not "no evidence" — it is "no evidence that you were careful," in an environment where AI-related standards of care are actively forming. Third, published guidance from the Joint Commission and CHAI notes that adopting responsible-use recommendations may reduce exposure to claims of negligent implementation.</p>
-      <p><strong>Design implication:</strong> the value is not in detection, it is in <em>documented response</em>. Build the response workflow, escalation path, and closure record as first-class features, not as an afterthought. A finding with no recorded resolution is a liability. A finding with one is a defense.</p>
-    </div>
+  <div class="prose">
+    <p>An organization holding all of these frameworks would cover essentially the full stack. But an organization holding only HIPAA &mdash; which describes the vast majority of direct care providers &mdash; covers one slice: data. And the data layer is not where most AI risk lives.</p>
 
-    <h3>4.3 State law is now the moving part</h3>
-    <p>With federal transparency requirements under active repeal, state obligations are where new duties are appearing — disclosure of AI use to patients, requirements that a licensed professional make final medical-necessity determinations, and similar. These vary by state and change annually.</p>
-    <p>Architecturally this argues for a <strong>jurisdiction lens</strong>: the same event stream, filtered by the rules of the state a given encounter occurred in. Build the state rules as configuration rather than as code, because they will change faster than your release cycle.</p>
+    <div class="box box-warn">
+      <span class="box-label">The Gap, Stated Plainly</span>
+      <p>Organizations required to comply only with HIPAA have no compliance-driven obligation to monitor whether their AI models are still accurate, whether performance has drifted since deployment, whether the AI vendor has changed the underlying model, or how their clinicians are actually responding to AI-generated recommendations.</p>
+      <p>This is not a statement about those organizations' intentions or diligence. It is a structural observation: when compliance spending follows legal obligation, and legal obligations stop at the data layer, AI governance receives no dedicated resources.</p>
+    </div>
   </div>
 </section>
 
-<!-- ============ 05 ============ -->
+<!-- ═════════════════════════ 05 2026 WAVE ═══════ -->
 <section class="part" id="p5">
-  <div class="parthead">
-    <span class="partnum">Part 05</span>
-    <h2>Implementation</h2>
-    <p>Maturity tiers, build order, and the roles required to actually run it.</p>
+  <div class="part-head">
+    <span class="part-label">Section 05</span>
+    <h2>The 2026 Certification Wave</h2>
+    <p class="part-intro">Three new programs entered the healthcare AI governance space in a five-week period in mid-2026. What changed, and what a striking gap in all of them reveals about the remaining problem.</p>
   </div>
 
-  <div class="col">
-    <h3>5.1 Maturity tiers</h3>
-    <p>Each tier is independently useful; nobody has to reach Tier 4 to benefit.</p>
-    <div class="box">
-      <span class="box-label">Two tierings, two different axes — do not confuse them</span>
-      <p><strong>Collector tiers (C0–C2, Part 03)</strong> describe <em>how</em> events get captured. They are chosen by technical capacity.</p>
-      <p><strong>Maturity tiers (1–4 and S, below)</strong> describe <em>how far</em> governance has progressed. They are chosen by organizational readiness.</p>
-      <p>An organization can sit at maturity Tier 4 while running only C0 collectors. That combination — full response workflow, cheap collection — is arguably the best value available and is the configuration to aim a small organization at.</p>
-    </div>
-  </div>
+  <div class="prose">
+    <p>Between May and June 2026, the healthcare AI governance landscape changed materially. Three distinct developments &mdash; one from an industry coalition, one from the sector's most established accreditation body, and one from a clinical quality organization &mdash; introduced new frameworks specifically for AI oversight in healthcare. A peer-reviewed maturity model also appeared in the academic literature. Together, these represent the market's first organized response to the gap described in Section 04.</p>
 
-  <div class="tiers">
-    <div class="tier">
-      <span class="tier-n">1</span>
-      <div>
-        <h4>Inventory — any organization, any budget</h4>
-        <p>A list of every AI in use, expressed as deployments rather than products. Which model, which population, which workflow, which owner, when last reviewed.</p>
-        <p><strong>Can be a spreadsheet.</strong> Typically reveals two to three times more AI than leadership believed existed, which is itself the finding that funds Tier 2.</p>
-      </div>
-    </div>
-    <div class="tier">
-      <span class="tier-n">2</span>
-      <div>
-        <h4>Capture</h4>
-        <p>Events are being written for the highest-volume deployments. <strong>Start at collector tier C0</strong> — read existing logs and message traffic, run proficiency tests, open an incident channel. Nothing is blocked; everything is recorded.</p>
-        <p>At this point the Access and Boundary lenses work, which means the organization is producing HIPAA audit evidence it previously could not produce — and the Model lens has a capability signal from proficiency testing without any integration at all.</p>
-      </div>
-    </div>
-    <div class="tier">
-      <span class="tier-n">3</span>
-      <div>
-        <h4>Lenses</h4>
-        <p>Model, Integrity, Environment, and Human lenses running on the captured stream. Deployment reports generate themselves on a schedule.</p>
-        <p>This is where an organization stops answering governance questions with opinion.</p>
-      </div>
-    </div>
-    <div class="tier">
-      <span class="tier-n">4</span>
-      <div>
-        <h4>Response</h4>
-        <p>Thresholds trigger defined action: flag, review, downgrade to advisory-only, suspend. Every finding carries a recorded resolution.</p>
-        <p>This is the tier that converts monitoring into governance, and the tier that satisfies legal.</p>
-      </div>
-    </div>
-    <div class="tier">
-      <span class="tier-n">S</span>
-      <div>
-        <h4>Shared / federated service</h4>
-        <p>Small organizations emit events to a shared evaluation service and receive analysis back. Nobody needs local data science staff.</p>
-        <p><strong>The structural argument for this tier:</strong> detecting change in human performance requires more volume than a single small organization has. It <em>must</em> be pooled to work at all. And the pooled infrastructure that makes it statistically possible is the same infrastructure that gives a small provider validation capacity it could never staff. One shared service, two otherwise unsolvable problems.</p>
-      </div>
-    </div>
-  </div>
+    <h3>CHAI Governance Playbooks (May 27, 2026)</h3>
+    <p>The Coalition for Health AI published a comprehensive set of governance playbooks in May 2026, developed with contributions from more than 150 organizations across 100 institutions. The CHAI playbooks cover eight governance elements: AI policy; organizational structures; organizational resources; lifecycle management; risk and impact assessment; data management; third-party management; and education and feedback.</p>
+    <p>Crucially, the CHAI playbooks are <strong>free and publicly available</strong>. They represent a control catalog without a certification pathway &mdash; precisely the separation between controls and attestation described in Section 03.</p>
 
-  <div class="col">
-    <h3>5.2 Build order</h3>
-    <p>The common failure is starting with a dashboard, because dashboards demonstrate well. You then discover the dashboard cannot answer anything, because nothing was linked. <strong>Start with the linkage.</strong></p>
-    <ol>
-      <li><strong>One deployment, full event capture.</strong> Prove the record can be written.</li>
-      <li><strong>Deployment inventory.</strong> Enumerate what exists.</li>
-      <li><strong>C0 collectors in monitor-only mode.</strong> Record everything, block nothing. This buys trust and reveals real usage patterns — including AI nobody disclosed.</li>
-      <li><strong>Access and Boundary lenses.</strong> Fastest value; produces compliance evidence immediately.</li>
-      <li><strong>Model and Human lenses.</strong> Requires a baseline period before findings mean anything.</li>
-      <li><strong>Response workflow.</strong> Findings get owners, deadlines, and recorded closure.</li>
-      <li><strong>Enforcement.</strong> Only now. This is a political act, not a technical one.</li>
-    </ol>
-    <p>Steps 3 through 7 form the arc that matters: <strong>arrive with evidence before you ask for authority.</strong> A control proposed as a control is a turf war. A system that has quietly logged for six months and can show leadership their actual AI footprint is an obvious next step.</p>
+    <h3>Joint Commission RUAIH Certification (June 1, 2026)</h3>
+    <p>The Joint Commission &mdash; which accredits approximately 22,000 healthcare organizations in the United States &mdash; launched its Responsible Use of AI in Healthcare certification on June 1, 2026. RUAIH is a voluntary, fee-based certification organized around five areas, including one explicitly focused on &ldquo;monitoring, evaluating, and validating safety performance&rdquo; of AI systems.</p>
 
-    <h3>5.3 Roles required</h3>
-    <p>These are functions, not headcount. In a small organization one person holds several.</p>
-  </div>
+    <h3>URAC Health Care AI Accreditation (2025&ndash;2026)</h3>
+    <p>URAC introduced separate accreditation pathways for AI developers and AI users in 2025&ndash;2026. The user pathway covers ongoing oversight practices including model drift management, testing protocols, and maintenance of AI systems in production.</p>
 
-  <div class="roles">
-    <div class="role"><span class="role-tag">Accountable</span><h4>Executive owner</h4><p>Holds the authority to suspend a deployment. Without this the system produces findings nobody can act on. Often a CMIO, CIO, or chief quality officer.</p></div>
-    <div class="role"><span class="role-tag">Design</span><h4>Informatics lead</h4><p>Owns the event schema and the deployment registry. The only role that sees both the clinical workflow and the data plumbing. This is the keystone role.</p></div>
-    <div class="role"><span class="role-tag">Build</span><h4>Platform engineer</h4><p>Implements the wrapper, the event pipeline, and the lens queries. Does not need machine-learning expertise; needs integration and observability skill.</p></div>
-    <div class="role"><span class="role-tag">Evaluate</span><h4>Analyst / data scientist</h4><p>Sets baselines, defines thresholds, interprets drift. At Tier S this role is provided by the shared service rather than hired.</p></div>
-    <div class="role"><span class="role-tag">Interpret</span><h4>Clinical or domain lead</h4><p>Decides what constitutes a meaningful change in the domain. Prevents statistically real, clinically irrelevant findings from consuming attention.</p></div>
-    <div class="role"><span class="role-tag">Constrain</span><h4>Compliance / privacy officer</h4><p>Owns control mapping and the claims language. Also owns the discoverability question from Part 04.</p></div>
-    <div class="role"><span class="role-tag">Adopt</span><h4>AI enablement lead</h4><p>The role most often missing. Owns rollout, training, and the feedback loop from users. Translates findings into workflow change rather than into memos.</p></div>
-    <div class="role"><span class="role-tag">Procure</span><h4>Contracting / vendor management</h4><p>Turns architectural requirements into contract terms — telemetry access, notification of model changes, right to audit.</p></div>
-  </div>
+    <h3>HAIRA: A Peer-Reviewed Maturity Model (February 2026)</h3>
+    <p>In February 2026, a team of researchers published the Healthcare AI Governance Readiness Assessment (HAIRA) in <em>npj Digital Medicine</em>. HAIRA is a five-level governance maturity model spanning seven domains, derived from a systematic review of 35 existing AI governance frameworks.</p>
 
-  <div class="col">
-    <h3>5.4 Adoption</h3>
-    <p>The reason this can be adopted "naturally," in your framing, is that it asks almost nobody to change behavior. Capture is passive. Clinicians do not fill anything in. The change management burden falls on a small number of technical and governance staff rather than on the whole workforce — which is the opposite of every governance program that failed before it.</p>
-    <p>Three adoption rules:</p>
-    <ul>
-      <li><strong>Never launch with enforcement.</strong> Trust first, control later.</li>
-      <li><strong>Give the first report to the people being measured</strong>, before it goes to leadership. This single sequencing decision determines whether clinical staff experience the system as a tool or as a threat.</li>
-      <li><strong>Treat unsanctioned AI use as a demand signal, not a violation.</strong> A high rate of blocked calls to consumer tools is a procurement requirement writing itself. Punish it and it goes underground; measure it and it tells you what to buy.</li>
-    </ul>
+    <div class="box box-good">
+      <span class="box-label">What This Wave Confirms</span>
+      <p>The market performed in five weeks what this article's architecture proposes as an ongoing structure: it separated the free control catalog (CHAI's playbooks) from the paid attestation (Joint Commission and URAC certifications built on substantially similar ground).</p>
+    </div>
 
-    <h3>5.5 Failure modes</h3>
-    <ul>
-      <li><strong>Alert fatigue in the governance layer.</strong> A system that fires constantly gets muted like every other alarm. Threshold discipline is a first-class design problem.</li>
-      <li><strong>Findings with no owner.</strong> Detection without a response workflow creates liability rather than safety.</li>
-      <li><strong>Scope creep into security tooling.</strong> This is not a SIEM and it is not an intrusion detection system. Adjacent, cheaper, better-funded products will eat it if the boundary is unclear.</li>
-      <li><strong>The dashboard trap.</strong> Building visualization before linkage.</li>
-      <li><strong>Individual attribution.</strong> Covered in Part 03; it is the fastest way to lose clinical cooperation permanently.</li>
-    </ul>
+    <div class="box box-warn">
+      <span class="box-label">The Gap That Remains</span>
+      <p>All three programs specify <em>that</em> organizations must monitor their AI systems. None specifies <em>how</em> the data being monitored is collected. They are requirement layers without an instrumentation layer.</p>
+      <p>The question has shifted from &ldquo;no framework exists for AI monitoring&rdquo; to &ldquo;four frameworks now specify what to monitor, and none specifies how to capture the underlying data &mdash; and the organizations all four aim to serve are precisely the ones least equipped to build their own capture infrastructure.&rdquo;</p>
+    </div>
   </div>
 </section>
 
-<!-- ============ 06 ============ -->
+<!-- ═════════════════════════ 06 ARCHITECTURE ═══ -->
 <section class="part" id="p6">
-  <div class="parthead">
-    <span class="partnum">Part 06</span>
-    <h2>Beyond hospitals</h2>
-    <p>The architecture is segment-agnostic. What varies is the artifact being produced and the quality signal that matters.</p>
+  <div class="part-head">
+    <span class="part-label">Section 06</span>
+    <h2>The Architecture</h2>
+    <p class="part-intro">The core proposal: a standardized event record that every AI interaction writes to once, and a set of compliance lenses that read it differently for each framework.</p>
   </div>
 
-  <div class="col">
-    <p>The event schema does not change across segments. What changes is what fills <code>artifact_ref</code> and what the Model lens is measuring against. That is the generalization mechanism — a new segment adopts the architecture by defining a <strong>domain pack</strong>, not by rebuilding governance.</p>
+  <div class="prose">
+    <h3>The Central Idea</h3>
+    <p>The architecture described here rests on an observation about what compliance frameworks and monitoring systems share: they all want to answer questions about the same set of events. HIPAA wants to know who accessed what patient data and when. The NIST AI RMF wants to know whether the model is still performing accurately and whether humans are appropriately overseeing it. The Joint Commission's RUAIH certification wants evidence that an organization is monitoring AI safety performance.</p>
+
+    <p>Each of these questions can be answered from a single, well-designed record of what happened during an AI interaction. The proposal is to write that record once and then read it through whichever compliance lenses an organization needs to satisfy. The first lens carries the full cost of capture. Every additional lens is nearly free, because the underlying data already exists.</p>
+
+    <div class="pullquote">
+      <p>Pay for capture once. <em>Every lens after the first costs almost nothing</em> &mdash; the data already exists.</p>
+    </div>
+
+    <h3>Why Governance Should Be Architecture, Not Policy</h3>
+    <p>There are two fundamental approaches to enforcing any rule. Policy enforcement writes the rule down, trains people on it, and audits for compliance later. Architectural enforcement makes non-compliant behavior structurally difficult &mdash; the rule is built into the system itself. Healthcare AI governance today is almost entirely the first kind, which is why producing audit evidence is a project someone has to initiate rather than a byproduct of the system running normally.</p>
+
+    <p>The security field has already made this transition in other domains. Password-sharing policies were replaced by single sign-on and multi-factor authentication. Nobody &ldquo;complies&rdquo; with a badge reader &mdash; they simply cannot open the door without one. The architecture proposed here applies the same logic to AI monitoring: capture is passive, it happens automatically as the system runs, and the compliance evidence it produces is a byproduct rather than an added task.</p>
+
+    <h3>The Event Record: What Gets Written Down</h3>
+    <p>Every AI interaction writes one standardized record. The record is designed to be small &mdash; it stores references and identifiers, not the actual content of the AI interaction &mdash; which keeps it out of scope for most data privacy concerns and makes it far easier to approve within a compliance-conscious organization.</p>
+  </div>
+
+  <div class="schema"><span class="c"># One record per AI interaction</span>
+<span class="k">event_id</span>         A unique identifier for this specific event
+<span class="k">timestamp</span>        When the interaction occurred
+<span class="k">actor_id</span>         Who initiated it &mdash; a clinician, coder, or automated service
+<span class="k">actor_role</span>       Their role: clinician / coder / reviewer / automated
+<span class="k">subject_ref</span>      A reference to the patient, claim, or member &mdash; not the data itself
+<span class="k">encounter_ref</span>    The clinical episode this interaction belongs to
+<span class="k">deployment_id</span>    Which AI deployment produced this &mdash; model + population + workflow + version
+<span class="k">purpose</span>          Why this AI call was made
+<span class="k">input_ref</span>        A pointer and hash to the input data &mdash; again, not the data itself
+<span class="k">output_summary</span>   The AI's output: a score, a classification, a recommended action
+<span class="k">confidence</span>       The model's stated confidence level, if it provides one
+<span class="k">latency_ms</span>       How long the model took to respond
+<span class="k">egress_target</span>    Where data was sent; whether a BAA covers that endpoint
+<span class="k">human_action</span>     What the clinician did: accepted / modified / rejected / ignored
+<span class="k">action_latency</span>   Time elapsed between the AI's output and the human's response
+<span class="k">artifact_ref</span>     A reference to any note, order, denial, or report produced
+<span class="k">downstream_ref</span>   A link to the outcome &mdash; filled in later when it becomes known</div>
+
+  <div class="prose">
+    <div class="box box-note">
+      <span class="box-label">Three Design Rules That Are Not Optional</span>
+      <p><strong>Store references, never the underlying data.</strong> The record holds pointers and cryptographic hashes &mdash; not the patient data itself. This keeps the monitoring layer outside the scope of most privacy regulations.</p>
+      <p><strong>Use <code>deployment_id</code>, not <code>model_id</code>.</strong> The same AI model running in two different settings is two different governed objects. Treating them as a single entity because they share the same underlying model is the most common and consequential error in AI governance design.</p>
+      <p><strong>Capture <code>human_action</code>.</strong> This is the field that almost no current monitoring system records, and it carries some of the most important governance information. A model that clinicians accept 6% of the time and ignore 94% of the time is not performing a clinical function &mdash; it is generating alert fatigue.</p>
+    </div>
+
+    <h3>The Compliance Lenses</h3>
+    <p>A <em>lens</em> is a predefined analysis run over the event record, derived from one framework's control catalog. The method for deriving a lens is straightforward: for each control a framework specifies, ask what observable fact in the event record would demonstrate that control is operating.</p>
   </div>
 
   <div class="scroller">
     <table>
-      <thead><tr><th>Segment</th><th>AI in use</th><th>Artifact produced</th><th>Quality signal</th><th>Extra compliance exposure</th></tr></thead>
+      <thead>
+        <tr><th>Lens</th><th>Derived from</th><th>Questions it can answer</th></tr>
+      </thead>
       <tbody>
-        <tr><th>Health plans / payers</th><td>Utilization review, prior auth, risk adjustment</td><td>Denial, approval, risk score</td><td>Appeal overturn rate</td><td>State UM laws; CMS interoperability rules</td></tr>
-        <tr><th>Pharmacy</th><td>Claim scoring, adherence prediction, DUR</td><td>Fill, reject, intervention</td><td>Override rate, false reject rate</td><td>DSCSA; state pharmacy boards</td></tr>
-        <tr><th>Labs &amp; diagnostics</th><td>Image and specimen interpretation, flagging</td><td>Result, flag</td><td>Concordance with confirmatory testing</td><td>CLIA; FDA where device-regulated</td></tr>
-        <tr><th>Digital health / SaaS</th><td>Triage, coaching, documentation</td><td>Recommendation, message</td><td>Escalation appropriateness</td><td>SOC 2 and HITRUST demanded by customers</td></tr>
-        <tr><th>Home health &amp; DME</th><td>Eligibility, documentation, scheduling</td><td>Order, claim</td><td>Audit and denial rate</td><td>Heavy program-integrity scrutiny</td></tr>
-        <tr><th>Behavioral health</th><td>Risk stratification, chat-based support</td><td>Assessment, message</td><td>Crisis escalation performance</td><td>42 CFR Part 2; state AI-therapy statutes</td></tr>
-        <tr><th>Life sciences</th><td>Trial matching, safety signal detection, evidence generation</td><td>Match, signal, dossier</td><td>Signal precision</td><td>GxP, Part 11 validation</td></tr>
-        <tr><th>Clearinghouses / RCM</th><td>Coding, claim scrubbing, denial prediction</td><td>Coded claim</td><td>Denial and rework rate</td><td>Business associate obligations at scale</td></tr>
+        <tr><th>Access</th><td>HIPAA Security Rule audit controls</td><td>Who accessed which patient record, was access minimum-necessary, are there anomalous access patterns?</td></tr>
+        <tr><th>Boundary</th><td>HIPAA transmission security; BAA obligations</td><td>Did data reach an endpoint not covered by a BAA? Is there evidence of unsanctioned tool use?</td></tr>
+        <tr><th>Environment</th><td>NIST 800-53 / FedRAMP continuous monitoring controls</td><td>Have configuration or version changes occurred that weren't authorized?</td></tr>
+        <tr><th>Integrity</th><td>SOC 2 processing integrity criteria</td><td>Are AI outputs complete and timely? What are the failure and retry rates?</td></tr>
+        <tr><th>Model</th><td>NIST AI RMF Measure function; ISO 42001</td><td>Is local accuracy holding? Is there evidence of drift across patient subgroups?</td></tr>
+        <tr><th>Human</th><td>No existing framework &mdash; newly proposed</td><td>What is the override rate? How long does it take clinicians to act on AI output?</td></tr>
+        <tr><th>Equity</th><td>Civil rights obligations; NIST AI RMF fairness guidance</td><td>Do AI-influenced outcomes differ systematically across patient populations?</td></tr>
       </tbody>
     </table>
   </div>
 
-  <div class="col">
-    <div class="box good">
-      <span class="box-label">Observation on segment ordering</span>
-      <p>Organizations selling into healthcare — digital health companies, AI vendors, RCM firms — are contractually required to hold SOC 2 or HITRUST because their customers demand it. They feel the certification cost directly and repeatedly.</p>
-      <p>This segment differs from provider organizations in three respects relevant to early adoption: an existing budget line for compliance evidence, engineering capacity sufficient for interception-based collection, and no restriction on being named publicly. Provider organizations — where the equity argument in §2.5 actually applies — have none of these. Any staged adoption sequence therefore begins with the segment furthest from the stated motivation, which is a tension worth naming rather than resolving.</p>
-    </div>
+  <div class="prose">
+    <p>The Human lens deserves special attention because it covers a documented harm category that the other lenses structurally cannot see: a model that is technically accurate, but whose presence in a workflow progressively degrades the clinical judgment of the people using it. Research on <em>automation bias</em> is well-established across multiple domains. In healthcare specifically, a 2025 study on endoscopist performance following AI adoption found measurable skill decline among physicians who worked regularly with AI assistance.</p>
   </div>
 </section>
 
-<!-- ============ 07 ============ -->
-<section class="part" id="p7">
-  <div class="parthead">
-    <span class="partnum">Part 07</span>
-    <h2>Adoption analysis</h2>
-    <p>Whether an architecture is sound and whether it will be adopted are separate questions with separate evidence. This part examines the second, including the reasons it may not be.</p>
+<!-- ═══════════════════════════════════ PAYWALL ════ -->
+<section class="part" id="paywall">
+  <div class="part-head">
+    <span class="part-label">Section 07</span>
+    <h2>Collection Methods</h2>
+    <p class="part-intro">Six distinct ways to fill the event record, matched to different organizational budgets, technical capacities, and AI deployment types.</p>
   </div>
 
-  <div class="col">
-    <h3>7.1 Why does this not already exist?</h3>
-    <p>This is the first question a serious reader asks, and a proposal that cannot answer it is usually naive rather than novel. If the components are cheap, the substrate is already mandated, and the need is obvious, the absence of an existing product demands an explanation.</p>
-    <p>There are six, and they are not equally flattering.</p>
-    <ol>
-      <li><strong>The buyer is fragmented.</strong> Compliance owns audit evidence. Security owns logs. Quality owns outcomes. IT owns systems. The value spans all four and no single budget covers it. This is the classic profile of a product that should exist and does not.</li>
-      <li><strong>There is no forcing function.</strong> Healthcare compliance spending follows mandates almost exclusively. Nothing here is mandated, which is the entire premise and also the reason nobody has built it.</li>
-      <li><strong>The enabling substrate is worse than it looks on paper.</strong> "HIPAA requires audit logs" is true. "Those logs are complete, consistent, and joinable" is frequently false. Anyone who scoped this work by reading the regulation rather than the logs would have quit at first contact.</li>
-      <li><strong>The win is invisible.</strong> Nobody is promoted for the incident that did not occur. Preventive infrastructure is chronically underfunded in every industry and healthcare is not an exception.</li>
-      <li><strong>Adjacent markets pay better.</strong> The engineering talent capable of building this is currently building fraud detection, revenue cycle automation, and compliance certification tooling, all of which have existing budget lines.</li>
-      <li><strong>The problem is genuinely new.</strong> Until roughly 2023, most clinical AI was a small number of narrow predictive models living inside the EHR, governable by committee review. Generative AI in workflow, ambient documentation at scale, agents, and unsanctioned consumer tool use are recent. <strong>The conditions that make this necessary are about three years old</strong> — and the market has now begun responding: the May–June 2026 certification wave (§1.6) is evidence that the demand became legible to institutions within the past year. That wave occupied the requirement layer first because requirements are cheaper to produce than instrumentation, which is consistent with, rather than contrary to, the gap this paper identifies.</li>
-    </ol>
-    <div class="box">
-      <span class="box-label">Assessment</span>
-      <p>Reasons 1, 2, 4 and 5 are economic and describe a market failure rather than a design flaw — they predict slow adoption regardless of technical merit. Reason 3 is a technical precondition that determines whether the approach functions at all, and is cheaply testable. Reason 6 is the substantive explanation: the conditions creating the need are recent enough that absence of a response is expected rather than evidence of infeasibility.</p>
-      <p>Distinguishing these matters analytically. A market failure and an infeasibility produce the same observation — nothing exists — and have opposite implications.</p>
+  <div class="paywall-fade">
+    <div class="prose">
+      <p>The event record described in Section 06 can be filled through six different collection methods. These methods differ considerably in what they can observe, what they cost, whether they require engineering staff, and whether they work on AI embedded inside a vendor's product &mdash; a category that encompasses a large and growing share of the AI healthcare organizations actually use.</p>
+
+      <h3>Method A &mdash; Intercepting the Call</h3>
+      <p>The first method involves inserting a <em>wrapper</em> &mdash; sometimes called a shim or middleware &mdash; around the AI call itself. A wrapper is a small piece of code that surrounds an existing function and adds logging without modifying the original code. This produces the highest-fidelity record possible: the exact input, the exact output, the precise timing, and the identity of whoever or whatever made the call, all captured in real time.</p>
+
+      <h3>Method B &mdash; Reading What Already Exists</h3>
+      <p>The second method requires no new interception at all. Instead, it reads records that the organization already produces: EHR audit logs, application logs, database change streams, and most importantly, the HL7 and FHIR message traffic flowing through the interface engine that virtually every provider organization operates...</p>
+    </div>
+  </div>
+
+  <div class="paywall-gate" id="paywall-gate">
+    <span class="gate-label">Continue Reading</span>
+    <h3>The full implementation guide is one purchase away</h3>
+    <p class="gate-sub">You've read the framework. The next three sections are where it becomes operational &mdash; how to collect the data, how to roll it out, and what the evidence base supports.</p>
+
+    <div class="what-you-get">
+      <div class="wyg-item">
+        <span class="wyg-label">Section 07</span>
+        <p>All six collection methods in full, with a cost &times; capability matrix and tiered starting configurations</p>
+      </div>
+      <div class="wyg-item">
+        <span class="wyg-label">Section 08</span>
+        <p>Staged implementation roadmap, role definitions, build order, the legal discoverability question, and three principles that separate programs that succeed from ones that stall</p>
+      </div>
+      <div class="wyg-item">
+        <span class="wyg-label">Section 09</span>
+        <p>Open questions, falsification conditions, anticipated objections, and 19 primary sources for every statistic cited in the article</p>
+      </div>
     </div>
 
-    <h3>7.2 Stakeholder analysis</h3>
-    <p>Adoption depends on an organizational coalition rather than a single decision. The table below records the position each function tends to occupy and the evidence that would move it, based on the structure of their respective mandates.</p>
-    <div class="scroller">
-      <table>
-        <thead><tr><th>Function</th><th>Typical position</th><th>Evidence that would move it</th></tr></thead>
-        <tbody>
-          <tr><th>Compliance / privacy</th><td>Supportive</td><td>Demonstration that audit evidence currently unavailable becomes producible</td></tr>
-          <tr><th>Information security</th><td>Contested</td><td>Supportive where a gap is filled; opposed where it appears to duplicate existing log tooling</td></tr>
-          <tr><th>Clinical informatics / quality</th><td>Supportive</td><td>Answers to deployment-level performance questions currently unanswerable</td></tr>
-          <tr><th>Legal counsel</th><td>Opposed by default</td><td>Evidence that documented monitoring with documented response reduces rather than increases exposure (§4.2)</td></tr>
-          <tr><th>Finance</th><td>Opposed by default</td><td>Quantified avoided cost: breach exposure, audit labor, deferred certification</td></tr>
-          <tr><th>Incumbent EHR vendor</th><td>Structurally opposed</td><td>Little. The contested claim is independence and cross-vendor comparability, not whether vendor monitoring exists.</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>7.3 Who is already in the room</h3>
-    <ul>
-      <li><strong>Healthcare GRC platforms</strong> — compliance workflow and risk assessment. Strong on paperwork, weak on runtime behavior.</li>
-      <li><strong>Compliance automation tools</strong> — evidence collection for SOC 2 and ISO. Strong on certification, not healthcare-clinical or AI-specific.</li>
-      <li><strong>ML observability vendors</strong> — drift and performance monitoring. Strong technically, no compliance mapping, no clinical workflow, no human-behavior layer.</li>
-      <li><strong>Enterprise AI governance suites</strong> — inventory and regulation mapping. Generic; retrofitted to healthcare.</li>
-      <li><strong>Academic systems</strong> such as Vanderbilt's algorithmovigilance work — the closest published implementation prior art, designed as monitoring alongside health IT rather than as collection in the call path.</li>
-      <li><strong>HAIRA maturity model</strong> (npj Digital Medicine, Feb 2026) — the closest published conceptual prior art, and it substantially anticipates this paper's maturity tiering, including the resource-equity motivation. The accurate relationship, stated rather than obscured: <strong>HAIRA specifies governance maturity; this paper specifies the instrumentation that maturity requires.</strong> HAIRA's levels describe what an organization at each stage does; the event record, collectors, and lenses describe what it runs. The two axes are complementary — HAIRA does not address collection methods, compliance catalog mapping, or the event schema, and this paper does not address organizational readiness assessment.</li>
-      <li><strong>Certification programs</strong> (Joint Commission RUAIH, URAC) and the <strong>CHAI control catalogs</strong> — requirement layers, per §1.6. They are best read not as competitors but as demand generators: each certification an organization pursues is an additional lens over the same captured record, and the CHAI catalogs, being free and public, are the natural first healthcare-native lens derivations alongside HIPAA.</li>
-    </ul>
-
-    <p>The unoccupied position is therefore: runtime AI workflow capture, in healthcare, mapped to multiple compliance control catalogs, at a cost structure reachable by organizations that will never certify. The mid-2026 certification wave strengthens rather than weakens this position — an organization now facing HIPAA obligations plus one or two voluntary certifications faces several overlapping monitoring specifications, and satisfying each separately is several projects, while capturing once and applying several lenses is one. <strong>The thesis required a world with multiple overlapping frameworks to be worth anything; that world arrived in May 2026.</strong> Whether the position is unoccupied because it is valuable and new, or because it is not viable, remains the question §7.1 attempts to separate.</p>
-
-    <h3>7.4 The structural adoption obstacle</h3>
-    <p>No organization is obligated to adopt this. That is the premise of the document — the gap exists precisely because obligation drives implementation — and it is simultaneously the primary obstacle to adoption. Compliance and safety expenditure in healthcare is overwhelmingly mandate-driven, which predicts that a voluntary control will diffuse slowly regardless of its merit.</p>
-    <p>Three quantifiable cost offsets exist, in descending order of how readily they can be measured: deferred certification expenditure for organizations facing SOC 2 or HITRUST requirements ($35K–$100K+); audit labor displaced by automated evidence production; and expected breach cost reduction against a $7.42M sector average. Only the first is measurable in advance; the second is measurable retrospectively; the third is an actuarial argument that requires incidence data this document does not have.</p>
-    <div class="box warn">
-      <span class="box-label">Consequence for the research agenda</span>
-      <p>The absence of incidence data linking control implementation to breach reduction is the most significant evidentiary gap in this entire document. The economic argument currently rests on the assumption that implementing controls without certification produces the security benefit of those controls. That assumption is plausible, widely held, and — as far as can be determined — unmeasured. See §9.1.</p>
-    </div>
-
-    <h3>7.5 Sustainment models</h3>
-    <p>Three structures could sustain the work, with materially different consequences for who benefits:</p>
-    <ul>
-      <li><strong>Open specification.</strong> The event schema and lens definitions published as a public standard, with implementation left open. Maximizes diffusion and citation; provides no funding mechanism.</li>
-      <li><strong>Shared evaluation service.</strong> Maturity Tier S operated as a consortium or grant-funded utility. Aligns most closely with the equity argument; requires institutional sponsorship to reach viability.</li>
-      <li><strong>Commercial tooling for regulated vendors.</strong> Serves organizations already purchasing compliance evidence. Financially the most tractable and the furthest from the population the equity argument concerns.</li>
-    </ul>
-    <p>These are not exclusive, but they are not neutral either: the financially easiest path serves the population with the least need, which is the same dynamic §2.5 identifies in the problem itself.</p>
-
-    <h3>7.6 Anticipated critiques</h3>
-    <p>Each critique below is one a reviewer or implementer is likely to raise. The responses are arguments, not rebuttals, and two of them are partially conceded.</p>
-
-    <details><summary>The EHR vendor already provides monitoring.</summary><div class="dbody"><p><strong>Partially conceded.</strong> Major EHR vendors do provide monitoring for models running inside their own products, and that coverage is real. Three properties are absent: visibility into AI outside that vendor's product, comparability across vendors, and independence — the party being evaluated supplies the evaluation. The first two are the substantive gaps; the third is a structural concern common to all self-reported quality data and is not unique to this domain.</p></div></details>
-
-    <details><summary>This duplicates existing security event monitoring.</summary><div class="dbody"><p><strong>Partially conceded.</strong> Security information and event management systems collect overlapping data, and the Access and Boundary lenses are genuinely adjacent to their function. The distinction is in the question being asked: security monitoring asks whether access was authorized; these lenses ask whether an AI-influenced clinical decision was sound and whether the human response to it was appropriate. Where an organization already operates such a system, the architecturally correct choice is to emit into it rather than alongside it.</p></div></details>
-
-    <details><summary>None of this is currently required.</summary><div class="dbody"><p><strong>Conceded, and it is the premise.</strong> The argument is that regulatory requirement is a lagging indicator of harm rather than a leading one, and that the marginal cost is low because the substrate is already funded. A secondary consideration: standards of care in this domain are actively forming, and organizations are evaluated against the standard prevailing at adjudication rather than at the time of the decision. That is an observation about liability exposure, not a claim about safety, and should not be substituted for one.</p></div></details>
-
-    <details><summary>Monitoring will degrade clinical system performance.</summary><div class="dbody"><p>Capture is asynchronous and the layer fails open: where an event cannot be written, the underlying call proceeds. This is a design commitment rather than a mitigation, and it is verifiable under test. It also has a cost — a fail-open layer cannot serve as a hard availability or access control, which bounds what the architecture can be relied upon for (§3.7).</p></div></details>
-
-    <details><summary>No staff exist to operate it.</summary><div class="dbody"><p>Maturity Tiers 1 and 2 at collector tier C0 require no analytic staff; proficiency testing and incident reporting are procedural rather than technical. Tier S externalizes the analytic function entirely. Where neither is available, the accurate conclusion is that the approach is not currently viable at that organization — which is a real limit on the equity claim in §2.5 and should be recorded as such rather than argued away.</p></div></details>
+    <a class="btn-gumroad" href="https://sportycat4.gumroad.com/l/capture-once" target="_blank" rel="noopener">
+      Get the Full Article
+    </a>
+    <span class="gate-price">One-time purchase &mdash; instant PDF download</span>
   </div>
 </section>
 
-<!-- ============ 08 ============ -->
-<section class="part" id="p8">
-  <div class="parthead">
-    <span class="partnum">Part 08</span>
-    <h2>What would kill this</h2>
-    <p>Written honestly, because a proposal that cannot name its own failure conditions has not been examined.</p>
-  </div>
-
-  <div class="col">
-    <ol>
-      <li><strong>EHR vendors ship it natively.</strong> The most likely death. They own the call path and the customer relationship. Countermeasure: independence and cross-vendor comparability are things they structurally cannot offer.</li>
-      <li><strong>Nobody buys a vitamin.</strong> Countermeasure: lead with the certification-deferral wedge, which has an existing budget line.</li>
-      <li><strong>The HIPAA Security Rule update lands and mandates something adjacent.</strong> This is arguably a tailwind rather than a risk, but it would reshape positioning overnight. Watch the July 2027 target.</li>
-      <li><strong>Legal blocks it on discoverability</strong> at enough organizations to stall the market. Countermeasure: response workflow as a first-class feature, and the three-part answer in Part 04.</li>
-      <li><strong>Log quality defeats the cheap tier.</strong> The C0 collectors depend on existing audit logs and message traffic actually being complete enough to answer a question. If they are not — and in many organizations they will not be — the entry tier collapses and the equity argument collapses with it. This is the most likely quiet failure and it should be tested first, not last.</li>
-      <li><strong>It becomes surveillance.</strong> One publicized case of individual clinician scoring would poison adoption across the field for years.</li>
-    </ol>
-
-    <div class="box">
-      <span class="box-label">The test that matters</span>
-      <p>If an organization implements Tier 1 and Tier 2 and cannot answer a single question it could not answer before, the thesis is wrong. That is a cheap, fast, falsifiable test — run it before building anything further.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 09 ============ -->
-<section class="part" id="p9">
-  <div class="parthead">
-    <span class="partnum">Part 09</span>
-    <h2>Open questions and evidence base</h2>
-  </div>
-
-  <div class="col">
-    <h3>9.1 Genuinely unresolved</h3>
-    <ul>
-      <li>How much volume is required before a change in human performance is detectable? This determines whether Tier S is optional or mandatory.</li>
-      <li>What is the minimum viable event schema? The version in Part 03 is a starting hypothesis, not a validated standard.</li>
-      <li>Can generative output be evaluated well enough to govern? Currently unsolved, and it is where most deployment is heading.</li>
-      <li>Does control implementation without certification actually reduce breach incidence? The premise is plausible and, to my knowledge, unmeasured.</li>
-      <li>Will organizations accept findings they are not required to act on?</li>
-    </ul>
-
-    <h3>9.2 Verify before publishing</h3>
-    <div class="box warn">
-      <span class="box-label">Sourcing discipline</span>
-      <p>The figures in this document were gathered from secondary reporting and should be traced to primary sources before any of it is published or presented. Specifically: breach counts to the HHS OCR portal; the HIPAA Security Rule timeline to the Federal Register; certification costs to assessor firms directly, since they vary widely by scope; and appeal-overturn figures to the underlying CMS reporting rather than to analyses of it.</p>
-    </div>
-
-    <h3>9.3 Sources</h3>
-    <ul class="sources">
-      <li><a href="https://www.hipaajournal.com/hipaa-security-rule-update-postponed/">HIPAA Security Rule update — status and July 2027 target</a></li>
-      <li><a href="https://www.hipaajournal.com/healthcare-data-breach-statistics/">Healthcare breach statistics</a></li>
-      <li><a href="https://www.comparitech.com/news/healthcare-ransomware-roundup-h1-2026-stats-on-attacks-ransoms-and-data-breaches/">Healthcare ransomware, H1 2026</a></li>
-      <li><a href="https://www.complyjet.com/blog/hitrust-certification">HITRUST certification cost tiers</a></li>
-      <li><a href="https://www.thoropass.com/blog/hitrust-audit-cost-a-guide">HITRUST audit cost detail</a></li>
-      <li><a href="https://elevateconsult.com/insights/the-skinny-on-it-compliance-certifications-from-hardest-to-easiest/">Framework difficulty and cost comparison</a></li>
-      <li><a href="https://resdac.org/cms-virtual-research-data-center-vrdc">CMS Virtual Research Data Center</a></li>
-      <li><a href="https://academic.oup.com/jamiaopen/article/8/5/ooaf136/8306998">VAMOS — algorithmovigilance monitoring system</a></li>
-      <li><a href="https://www.nature.com/articles/s41746-024-01237-y">Algorithmovigilance, lessons from pharmacovigilance</a></li>
-      <li><a href="https://www.jointcommission.org/en-us/knowledge-library/news/2025-09-jc-and-chai-release-initial-guidance-to-support-responsible-ai-adoption">Joint Commission + CHAI responsible use guidance</a></li>
-      <li><a href="https://www.healthit.gov/topic/laws-regulation-and-policy/hti-5-proposed-rule-fact-sheet">HTI-5 proposed rule</a></li>
-      <li><a href="https://pubmed.ncbi.nlm.nih.gov/39761454/">Hospital AI use and local evaluation</a></li>
-      <li><a href="https://www.thelancet.com/journals/langas/article/PIIS2468-1253(25)00133-5/abstract">Endoscopist deskilling after AI exposure</a></li>
-      <li><a href="https://www.kff.org/medicare/examining-the-potential-impact-of-medicares-new-wiser-model/">CMS WISeR model</a></li>
-      <li><a href="https://www.chai.org/news/coalition-for-health-ai-chai-releases-comprehensive-governance-playbooks-to">CHAI governance playbooks (May 2026)</a></li>
-      <li><a href="https://www.jointcommission.org/en-us/knowledge-library/news/2026-05-responsible-use-of-ai-in-healthcare-certification">Joint Commission RUAIH certification (June 2026)</a></li>
-      <li><a href="https://www.urac.org/blog/uracs-health-care-ai-accreditation-highlighted-as-a-national-standard-for-2026/">URAC Health Care AI accreditation</a></li>
-      <li><a href="https://www.nature.com/articles/s41746-026-02418-7">HAIRA maturity model (npj Digital Medicine, Feb 2026)</a></li>
-      <li><a href="https://regulatingai.substack.com/p/the-doj-ai-litigation-task-force">DOJ AI Litigation Task Force — activity status</a></li>
-    </ul>
-  </div>
-</section>
+<!-- ══════════════════════════════════ FOOTER ═════ -->
+<footer class="site-foot">
+  <span>Nicole Cevallos &nbsp;&middot;&nbsp; Healthcare AI Governance &nbsp;&middot;&nbsp; 2026</span>
+  <span>Presented at THIA 2026 &nbsp;&middot;&nbsp; UT Arlington</span>
+</footer>
 
 </div>
 
-<footer style="max-width:1140px;margin:0 auto;padding:36px clamp(18px,4vw,44px) 70px;
-               font-family:system-ui,sans-serif;font-size:14px;color:#798194;
-               border-top:1px solid #d8dde6;display:flex;flex-wrap:wrap;gap:10px 24px">
-  <span>© 2026 Nicole Cevallos</span>
-  <span><a href="index.html" style="color:#4f5769">Back to research index</a></span>
-  <span>Acknowledged contributor: Gabrielle Cevallos</span>
-</footer>
 </body>
 </html>
