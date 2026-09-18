@@ -396,10 +396,10 @@ footer.site-foot a:hover { color: var(--accent); }
   <ol>
     <li><a href="#p1"><span class="n">01</span> Introduction</a></li>
     <li><a href="#p2"><span class="n">02</span> The Regulatory Baseline: HIPAA</a></li>
-    <li><a href="#p3"><span class="n">03</span> The Broader Compliance Landscape</a></li>
-    <li><a href="#p4"><span class="n">04</span> The AI Oversight Gap</a></li>
-    <li><a href="#p5"><span class="n">05</span> The 2026 Certification Wave</a></li>
-    <li><a href="#p6"><span class="n">06</span> The Architecture</a></li>
+    <li><a href="#paywall"><span class="n">03</span> The Broader Compliance Landscape <span class="locked">&#x1F512;</span></a></li>
+    <li><a href="#paywall"><span class="n">04</span> The AI Oversight Gap <span class="locked">&#x1F512;</span></a></li>
+    <li><a href="#paywall"><span class="n">05</span> The 2026 Certification Wave <span class="locked">&#x1F512;</span></a></li>
+    <li><a href="#paywall"><span class="n">06</span> The Architecture <span class="locked">&#x1F512;</span></a></li>
     <li><a href="#paywall"><span class="n">07</span> Collection Methods <span class="locked">&#x1F512;</span></a></li>
     <li><a href="#paywall"><span class="n">08</span> Implementation <span class="locked">&#x1F512;</span></a></li>
     <li><a href="#paywall"><span class="n">09</span> Open Questions &amp; Evidence <span class="locked">&#x1F512;</span></a></li>
@@ -482,15 +482,16 @@ footer.site-foot a:hover { color: var(--accent); }
   </div>
 </section>
 
-<!-- ═════════════════════════ 03 FRAMEWORKS ═════ -->
-<section class="part" id="p3">
+<!-- ═══════════════════════════════════ PAYWALL ════ -->
+<section class="part" id="paywall">
   <div class="part-head">
     <span class="part-label">Section 03</span>
     <h2>The Broader Compliance Landscape</h2>
     <p class="part-intro">The frameworks that go further than HIPAA, what each one covers, and why the cost of formal certification keeps most healthcare organizations from pursuing them.</p>
   </div>
 
-  <div class="prose">
+  <div class="paywall-fade">
+    <div class="prose">
     <p>A range of compliance frameworks exists beyond HIPAA, each addressing different aspects of information security, system trustworthiness, and, increasingly, the governance of artificial intelligence. Understanding what each framework covers &mdash; and what it costs &mdash; is essential context for understanding the gap this article addresses.</p>
 
     <h3>The Major Frameworks</h3>
@@ -550,10 +551,36 @@ footer.site-foot a:hover { color: var(--accent); }
       <p>An organization can implement HITRUST-level controls without paying for a HITRUST certificate. It forfeits the badge, but retains whatever protective effect those controls provide. This distinction is central to the architecture proposed in Section 06.</p>
     </div>
   </div>
+  </div>
+
+  <div class="paywall-gate" id="paywall-gate">
+    <span class="gate-label">Continue Reading</span>
+    <h3>The full article is one purchase away</h3>
+    <p class="gate-sub">You&rsquo;ve read the foundation. Sections 3&ndash;9 cover the compliance landscape in full, the AI oversight gap, the 2026 certification wave, the proposed architecture, and how to implement it.</p>
+
+    <div class="what-you-get">
+      <div class="wyg-item">
+        <span class="wyg-label">Sections 03 &ndash; 06</span>
+        <p>The full compliance landscape, the AI oversight gap, the 2026 certification wave, and the complete "Capture Once, Govern Many" architecture</p>
+      </div>
+      <div class="wyg-item">
+        <span class="wyg-label">Section 07</span>
+        <p>All six collection methods in full, with a cost &times; capability matrix and tiered starting configurations</p>
+      </div>
+      <div class="wyg-item">
+        <span class="wyg-label">Sections 08 &ndash; 09</span>
+        <p>Staged implementation roadmap, role definitions, open questions, and 19 primary sources for every statistic cited</p>
+      </div>
+    </div>
+
+    <a class="btn-gumroad" href="https://sportycat4.gumroad.com/l/capture-once" target="_blank" rel="noopener">
+      Get the Full Article &mdash; $12
+    </a>
+    <span class="gate-price">One-time purchase &mdash; instant PDF download</span>
+  </div>
 </section>
 
-<!-- ═════════════════════════ 04 AI GAP ══════════ -->
-<section class="part" id="p4">
+<section class="part" id="p4-placeholder" style="display:none">
   <div class="part-head">
     <span class="part-label">Section 04</span>
     <h2>The AI Oversight Gap</h2>
@@ -718,53 +745,6 @@ footer.site-foot a:hover { color: var(--accent); }
 
   <div class="prose">
     <p>The Human lens deserves special attention because it covers a documented harm category that the other lenses structurally cannot see: a model that is technically accurate, but whose presence in a workflow progressively degrades the clinical judgment of the people using it. Research on <em>automation bias</em> is well-established across multiple domains. In healthcare specifically, a 2025 study on endoscopist performance following AI adoption found measurable skill decline among physicians who worked regularly with AI assistance.</p>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════ PAYWALL ════ -->
-<section class="part" id="paywall">
-  <div class="part-head">
-    <span class="part-label">Section 07</span>
-    <h2>Collection Methods</h2>
-    <p class="part-intro">Six distinct ways to fill the event record, matched to different organizational budgets, technical capacities, and AI deployment types.</p>
-  </div>
-
-  <div class="paywall-fade">
-    <div class="prose">
-      <p>The event record described in Section 06 can be filled through six different collection methods. These methods differ considerably in what they can observe, what they cost, whether they require engineering staff, and whether they work on AI embedded inside a vendor's product &mdash; a category that encompasses a large and growing share of the AI healthcare organizations actually use.</p>
-
-      <h3>Method A &mdash; Intercepting the Call</h3>
-      <p>The first method involves inserting a <em>wrapper</em> &mdash; sometimes called a shim or middleware &mdash; around the AI call itself. A wrapper is a small piece of code that surrounds an existing function and adds logging without modifying the original code. This produces the highest-fidelity record possible: the exact input, the exact output, the precise timing, and the identity of whoever or whatever made the call, all captured in real time.</p>
-
-      <h3>Method B &mdash; Reading What Already Exists</h3>
-      <p>The second method requires no new interception at all. Instead, it reads records that the organization already produces: EHR audit logs, application logs, database change streams, and most importantly, the HL7 and FHIR message traffic flowing through the interface engine that virtually every provider organization operates...</p>
-    </div>
-  </div>
-
-  <div class="paywall-gate" id="paywall-gate">
-    <span class="gate-label">Continue Reading</span>
-    <h3>The full implementation guide is one purchase away</h3>
-    <p class="gate-sub">You've read the framework. The next three sections are where it becomes operational &mdash; how to collect the data, how to roll it out, and what the evidence base supports.</p>
-
-    <div class="what-you-get">
-      <div class="wyg-item">
-        <span class="wyg-label">Section 07</span>
-        <p>All six collection methods in full, with a cost &times; capability matrix and tiered starting configurations</p>
-      </div>
-      <div class="wyg-item">
-        <span class="wyg-label">Section 08</span>
-        <p>Staged implementation roadmap, role definitions, build order, the legal discoverability question, and three principles that separate programs that succeed from ones that stall</p>
-      </div>
-      <div class="wyg-item">
-        <span class="wyg-label">Section 09</span>
-        <p>Open questions, falsification conditions, anticipated objections, and 19 primary sources for every statistic cited in the article</p>
-      </div>
-    </div>
-
-    <a class="btn-gumroad" href="https://sportycat4.gumroad.com/l/capture-once" target="_blank" rel="noopener">
-      Get the Full Article
-    </a>
-    <span class="gate-price">One-time purchase &mdash; instant PDF download</span>
   </div>
 </section>
 
